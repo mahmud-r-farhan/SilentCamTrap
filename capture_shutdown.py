@@ -19,3 +19,7 @@ time.sleep(1)
 
 # Shutdown Windows immediately
 os.system("shutdown /s /t 0")
+# Note: This script will shut down the computer immediately after capturing an image.
+# Ensure you have saved all your work before running this script.
+# If you want to test the script without shutting down, comment out the shutdown line.
+# Follow for more: https://github.com/mahmud-r-farhan
