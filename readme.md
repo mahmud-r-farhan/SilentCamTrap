@@ -42,7 +42,7 @@ SilentCamTrap is a personal security utility designed to discreetly capture an i
    ```bash
    pip install opencv-python pyinstaller
 
-```
+``
 
 3.  **Compile the Python script** into an executable:
     
