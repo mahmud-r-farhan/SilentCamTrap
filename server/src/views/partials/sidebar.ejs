@@ -1,0 +1,56 @@
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <span class="sidebar-title">SilentCamTrap</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a href="/" class="nav-item <%= typeof title !== 'undefined' && title === 'Dashboard' ? 'active' : '' %>">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/entries"
+                class="nav-item <%= typeof title !== 'undefined' && title === 'All Entries' ? 'active' : '' %>">
+                <i class="fas fa-camera"></i>
+                <span>All Captures</span>
+            </a>
+            <a href="/map"
+                class="nav-item <%= typeof title !== 'undefined' && title === 'Location Map' ? 'active' : '' %>">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>Location Map</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">System</div>
+            <a href="/settings"
+                class="nav-item <%= typeof title !== 'undefined' && title === 'Settings' ? 'active' : '' %>">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/api/health" class="nav-item" target="_blank">
+                <i class="fas fa-heartbeat"></i>
+                <span>Health Check</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">
+                <%= typeof username !=='undefined' ? username.charAt(0).toUpperCase() : 'A' %>
+            </div>
+            <div>
+                <div class="user-name">
+                    <%= typeof username !=='undefined' ? username : 'Admin' %>
+                </div>
+                <div class="user-role">Administrator</div>
+            </div>
+        </div>
+    </div>
+</aside>

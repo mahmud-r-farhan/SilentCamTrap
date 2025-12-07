@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SilentCamTrap - Location Map">
+    <title>
+        <%= title %> | SilentCamTrap
+    </title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+
+    <%- include('partials/styles') %>
+
+        <style>
+            .leaflet-popup-content-wrapper {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+            }
+
+            .leaflet-popup-content {
+                color: var(--text-primary);
+                margin: 0.75rem;
+            }
+
+            .leaflet-popup-tip {
+                background: var(--bg-secondary);
+            }
+
+            .custom-popup {
+                min-width: 200px;
+            }
+
+            .custom-popup img {
+                width: 100%;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 8px;
+                margin-bottom: 0.5rem;
+            }
+
+            .custom-popup h4 {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .custom-popup p {
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-bottom: 0.5rem;
+            }
+
+            .custom-popup .btn {
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+
+            @media (max-width: 1024px) {
+                .map-legend {
+                    left: 1rem !important;
+                }
+            }
+        </style>
+</head>
+
+<body>
+    <div class="layout">
+        <%- include('partials/sidebar') %>
+
+            <main class="main-content">
+                <%- include('partials/header-bar') %>
+
+                    <div class="page-content">
+                        <div class="card animate-fade-in"
+                            style="height: calc(100vh - 180px); padding: 0; overflow: hidden;">
+                            <div id="fullscreen-map" style="width: 100%; height: 100%;"></div>
+                        </div>
+                    </div>
+            </main>
+    </div>
+
+    <!-- Map Legend -->
+    <div class="map-legend"
+        style="position: fixed; bottom: 2rem; left: calc(var(--sidebar-width) + 2rem); z-index: 1000; background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i>
+            Map Legend
+        </h4>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+            <span style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></span>
+            <span>Capture Location</span>
+        </div>
+    </div>
+
+    <!-- Map Controls -->
+    <div
+        style="position: fixed; top: calc(var(--header-height) + 2rem); right: 2rem; z-index: 1000; display: flex; flex-direction: column; gap: 0.5rem;">
+        <button class="btn btn-secondary btn-icon" onclick="map.setView([20, 0], 2)" title="Reset View">
+            <i class="fas fa-globe"></i>
+        </button>
+        <button class="btn btn-secondary btn-icon" onclick="fitAllMarkers()" title="Fit All Markers">
+            <i class="fas fa-expand-arrows-alt"></i>
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <%- include('partials/scripts') %>
+
+        <script>
+            const locations = <% - locations %>;
+
+            const map = L.map('fullscreen-map', {
+                center: [20, 0],
+                zoom: 2,
+                zoomControl: true
+            });
+
+            // Dark theme tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            // Custom marker icon
+            const markerIcon = L.divIcon({
+                html: `
+                <div style="
+                    width: 20px; 
+                    height: 20px; 
+                    background: linear-gradient(135deg, #6366f1, #818cf8); 
+                    border: 3px solid white; 
+                    border-radius: 50%; 
+                    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+                "></div>
+            `,
+                className: 'custom-marker',
+                iconSize: [20, 20]
+            });
+
+            const markers = [];
+
+            // Add markers for each location
+            locations.forEach(loc => {
+                if (loc.lat && loc.lng) {
+                    const popupContent = `
+                    <div class="custom-popup">
+                        <img src="/uploads/${loc.image}" alt="Capture" onerror="this.style.display='none'">
+                        <h4>${loc.city || 'Unknown Location'}</h4>
+                        <p>${loc.country || ''}</p>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">
+                            ${new Date(loc.timestamp).toLocaleString()}
+                        </p>
+                        <a href="/entry/${loc.id}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                            View Details
+                        </a>
+                    </div>
+                `;
+
+                    const marker = L.marker([loc.lat, loc.lng], { icon: markerIcon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+
+                    markers.push(marker);
+                }
+            });
+
+            // Fit bounds if markers exist
+            function fitAllMarkers() {
+                if (markers.length > 0) {
+                    const group = new L.featureGroup(markers);
+                    map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 10 });
+                }
+            }
+
+            if (markers.length > 0) {
+                fitAllMarkers();
+            }
+        </script>
+</body>
+
+</html>

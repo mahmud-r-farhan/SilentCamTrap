@@ -1,107 +1,370 @@
-# Intruder Detection and Data Collection System (SilentCamTrap)
+# 🔒 SilentCamTrap
 
-## Overview
-This project consists of a Python client script that:
-- Captures a webcam image.
-- Collects additional device data: public IP (external IP, which may be VPN-masked), local network IP (internal LAN IP), approximate real-time location (latitude/longitude via IP geolocation), and browser history (last 10 visits from Chrome and Firefox, if available).
-- Saves the image locally.
-- Sends the image and collected data to a Node.js server via HTTP POST.
-- If successful, deletes the running executable (if compiled) using a platform-specific script and shuts down the device.
+<div align="center">
 
-The Node.js server receives the image and data, saves the image, logs the data, and responds with success.
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
+![Python](https://img.shields.io/badge/python-%3E%3D3.8-blue.svg)
 
-**Educational Purpose Disclaimer:**  
-This project is intended for educational purposes only. It demonstrates concepts in computer vision, data collection, networking, and scripting. Do not use this software for any illegal, unethical, or unauthorized activities, such as invading privacy, unauthorized data access, or malicious intent. Always obtain explicit consent and comply with local laws when handling personal data. The authors disclaim any liability for misuse.
+**Advanced Intruder Detection & Data Collection System**
 
-**Important Notes:**
-- This is for educational/security purposes on your own device. Ensure legal compliance for data collection, especially browser history.
-- Location is approximate (based on public IP via geolocation API). If VPN is active, it will reflect the VPN's location/IP.
-- "Real network IP": We collect both public IP (external, via API) and local IP (internal network). Bypassing VPN for true ISP IP requires advanced techniques (e.g., WebRTC in browsers) not feasible in pure Python without extensions.
-- Browser history: Collects from default profiles; may require browser to be closed or handle file copies to avoid locks. Timestamps are raw from databases (Chrome: WebKit time, Firefox: microseconds since UNIX epoch). Paths are Windows-specific; for Linux, update paths in client.py (e.g., Chrome: ~/.config/google-chrome/Default/History, Firefox: ~/.mozilla/firefox/*.default/places.sqlite).
-- Dependencies: Install via pip if needed for client.py and building executable; `npm install` for server.js). Standard Python libs handle SQLite and config.
-- If running as .py (not executable), deletion targets sys.executable (python executable), which may not be intended! test carefully.
-- Security: Use HTTPS in production. Add authentication to the API endpoint.
-- Cross-Platform: The script is primarily for Windows. For Linux, modify shutdown command (e.g., 'shutdown -h now'), browser paths, and self-deletion script (use .sh instead of .bat).
+*Capture, analyze, and monitor security events with an elegant dashboard*
 
-## Folder Structure
+[Features](#-features) • [Installation](#-installation) • [Documentation](#-documentation) • [API](#-api-reference) • [Support](#-support)
+
+</div>
+
+---
+
+## 📋 Overview
+
+SilentCamTrap is a comprehensive security monitoring solution that captures intruder data including webcam images, system information, network details, and browser history. The system features a modern, interactive dashboard for viewing and managing captured data.
+
+### What's Included
+
+| Component | Description |
+|-----------|-------------|
+| **Python Client** | Cross-platform data collection agent |
+| **Node.js Server** | RESTful API with persistent storage |
+| **EJS Dashboard** | Interactive web interface with dark theme |
+| **Docker Support** | Production-ready containerization |
+
+---
+
+## ✨ Features
+
+### 🐍 Python Client
+- ✅ Webcam image capture with quality optimization
+- ✅ Cross-platform support (Windows, macOS, Linux)
+- ✅ Multiple IP detection services with fallback
+- ✅ Geolocation via IP address
+- ✅ Browser history collection (Chrome, Firefox)
+- ✅ System information gathering
+- ✅ Configurable via JSON file or environment variables
+- ✅ Professional logging with file output
+- ✅ PyInstaller-ready for standalone executables
+
+### 🚀 Node.js Server
+- ✅ Express.js with security middleware (Helmet, CORS)
+- ✅ Session-based authentication
+- ✅ Rate limiting for API protection
+- ✅ File upload with validation
+- ✅ Persistent JSON-based data storage
+- ✅ Health check endpoint
+- ✅ Organized date-based file storage
+- ✅ RESTful API design
+
+### 🎨 Dashboard
+- ✅ Stunning dark theme with glassmorphism
+- ✅ Real-time statistics and charts
+- ✅ Interactive Leaflet map visualization
+- ✅ Responsive design (mobile-friendly)
+- ✅ Entry detail view with all captured data
+- ✅ Browser history viewer
+- ✅ Pagination and filtering
+- ✅ Export functionality
+
+---
+
+## 🚀 Installation
+
+### Prerequisites
+
+- **Node.js** v18.0.0 or higher
+- **Python** 3.8 or higher
+- **npm** or **yarn**
+- **Docker** (optional, for containerized deployment)
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/mahmud-r-farhan/SilentCamTrap.git
+cd SilentCamTrap
+
+# Install server dependencies
+cd server
+npm install
+
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your settings
+
+# Start the server
+npm run dev
+
+# In another terminal, set up Python client
+cd ../python
+pip install -r requirements.txt
+```
+
+---
+
+## 📖 Documentation
+
+### Server Setup
+
+#### 1. Environment Configuration
+
+Create a `.env` file in the `server` directory:
+
+```env
+# Server Configuration
+NODE_ENV=production
+PORT=3000
+
+# Security
+SESSION_SECRET=your-super-secret-session-key
+API_KEY=your-api-key-for-client-authentication
+
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-secure-password
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# File Upload
+MAX_FILE_SIZE_MB=10
+```
+
+#### 2. Running the Server
+
+**Development Mode:**
+```bash
+npm run dev
+```
+
+**Production Mode:**
+```bash
+npm start
+```
+
+#### 3. Accessing the Dashboard
+
+Open your browser and navigate to: `http://localhost:3000`
+
+Default credentials:
+- **Username:** admin
+- **Password:** admin123
+
+> ⚠️ **Important:** Change the default credentials in production!
+
+---
+
+### Python Client Setup
+
+#### 1. Configuration
+
+Edit `config.json` in the `python` directory:
+
+```json
+{
+  "api_url": "http://your-server:3000/api/upload",
+  "log_folder": "intruder_logs",
+  "webcam_index": 0,
+  "webcam_warmup_seconds": 0.5,
+  "connection_timeout": 30,
+  "enable_shutdown": false,
+  "enable_self_delete": false,
+  "enable_browser_history": true,
+  "max_browser_history": 10,
+  "log_level": "INFO"
+}
+```
+
+#### 2. Running the Client
+
+```bash
+python client.py
+```
+
+#### 3. Building Standalone Executable
+
+**Windows:**
+```bash
+pyinstaller --onefile --icon=game.ico --hidden-import=cv2 --hidden-import=geocoder client.py
+```
+
+**Linux/macOS:**
+```bash
+pyinstaller --onefile --hidden-import=cv2 --hidden-import=geocoder client.py
+chmod +x dist/client
+```
+
+---
+
+### Docker Deployment
+
+#### Using Docker Compose (Recommended)
+
+```bash
+cd server
+
+# Build and start
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
+#### Using Docker CLI
+
+```bash
+# Build image
+docker build -t silentcamtrap-server .
+
+# Run container
+docker run -d \
+  --name silentcamtrap \
+  -p 3000:3000 \
+  -v $(pwd)/data:/app/data \
+  -e SESSION_SECRET=your-secret \
+  -e ADMIN_PASSWORD=your-password \
+  silentcamtrap-server
+```
+
+#### Docker Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Environment mode | production |
+| `PORT` | Server port | 3000 |
+| `SESSION_SECRET` | Session encryption key | (required) |
+| `API_KEY` | Client authentication key | (required) |
+| `ADMIN_USERNAME` | Dashboard username | admin |
+| `ADMIN_PASSWORD` | Dashboard password | admin123 |
+| `ENABLE_AUTH` | Enable authentication | true |
+| `ENABLE_RATE_LIMIT` | Enable rate limiting | true |
+
+---
+
+## 🔌 API Reference
+
+### Authentication
+
+All API endpoints (except `/api/health`) require authentication via:
+- **Session:** For dashboard access
+- **API Key:** For client uploads (header: `X-API-Key`)
+
+### Endpoints
+
+#### Upload Data
+```http
+POST /api/upload
+Content-Type: multipart/form-data
+X-API-Key: your-api-key
+
+file: <image file>
+data: <JSON data>
+```
+
+#### Get All Entries
+```http
+GET /api/entries?limit=100&offset=0
+```
+
+#### Get Single Entry
+```http
+GET /api/entries/:id
+```
+
+#### Delete Entry
+```http
+DELETE /api/entries/:id
+```
+
+#### Get Statistics
+```http
+GET /api/stats
+```
+
+#### Health Check
+```http
+GET /api/health
+```
+
+---
+
+## 📁 Project Structure
+
 ```
 SilentCamTrap/
-├── python          
-│   ├── game.ico      # Icon file for the executable (add your own ICO file here; works on Windows, optional on Linux)
-│   └── client.py      # The Python script for capturing image, collecting data (IP, location, browser histories), and sending to server
+├── python/
+│   ├── client.py          # Python client script
+│   ├── config.json        # Client configuration
+│   ├── requirements.txt   # Python dependencies
+│   └── game.ico           # Executable icon
 ├── server/
-│   └── server.js      # The Node.js server for receiving the image and data
-├── intruder_logs/     # Folder where captured images are saved locally (created automatically by client.py)
-├── uploads/           # Folder where server saves received images (created automatically by server.js)
-└── README.md          # This documentation file explaining the setup and usage
+│   ├── src/
+│   │   ├── server.js      # Main server application
+│   │   ├── views/         # EJS templates
+│   │   │   ├── dashboard.ejs
+│   │   │   ├── entries.ejs
+│   │   │   ├── entry-detail.ejs
+│   │   │   ├── login.ejs
+│   │   │   ├── map.ejs
+│   │   │   ├── settings.ejs
+│   │   │   └── error.ejs
+│   │   └── public/        # Static assets
+│   ├── data/              # Data storage
+│   │   ├── uploads/       # Uploaded images
+│   │   └── logs/          # Application logs
+│   ├── package.json
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── .env.example
+├── docs/                  # Documentation
+└── README.md
 ```
 
-## Building the .exe (Windows)
-To compile `client.py` into a standalone executable (.exe) for easier distribution or testing (e.g., as a self-deleting intruder logger), use PyInstaller. This packages the script with all dependencies into a single file.
+---
 
-1. Install PyInstaller if not already: `pip install pyinstaller`.
-2. Navigate to the project root (where `client.py` and `game.ico` are).
-3. Run the command:
-   ```
-   pyinstaller --onefile --icon=game.ico client.py
-   ```
-   - `--onefile`: Creates a single .exe file.
-   - `--icon=icon.ico`: Uses the provided ICO file as the executable's icon (optional; skip if no icon needed).
-4. The build output will be in the `dist/` folder (e.g., `dist/client.exe`).
-5. Test the .exe: Run `dist/client.exe`. It will perform the actions and, if send succeeds, create a batch file to delete itself after a short delay and shut down.
-   - Note: If running the .exe, ensure browsers are closed for history access, and test without internet/shutdown first by commenting out relevant lines in `client.py` before building.
-   - Common issues: If dependencies fail (e.g., OpenCV), add `--hidden-import=cv2` to the pyinstaller command.
+## 🔐 Security Considerations
 
-## Building the Executable (Linux)
-To compile `client.py` into a standalone executable binary for Linux, use PyInstaller. This creates a single-file binary that can be run without Python installed.
+1. **Always use HTTPS in production**
+2. **Change default credentials immediately**
+3. **Use strong API keys**
+4. **Configure rate limiting appropriately**
+5. **Regular backup of captured data**
+6. **Restrict network access to the server**
 
-1. Install PyInstaller if not already: `pip install pyinstaller`.
-2. Navigate to the project root (where `client.py` is).
-3. Run the command:
-   ```
-   pyinstaller --onefile client.py
-   ```
-   - `--onefile`: Creates a single executable file.
-   - Note: Icons (.ico) are not directly supported on Linux executables; skip `--icon` or convert to a suitable format if needed (PyInstaller on Linux typically doesn't embed icons like Windows).
-4. The build output will be in the `dist/` folder (e.g., `dist/client`).
-5. Make it executable: `chmod +x dist/client`.
-6. Test the binary: Run `./dist/client`. It will perform the actions, but note:
-   - Shutdown: Modify `os.system("shutdown /s /t 0")` in `client.py` to `os.system("shutdown -h now")` before building.
-   - Self-deletion: The current batch (.bat) is Windows-specific. Update the script creation in `client.py` for Linux, e.g., use a .sh file:
-     ```
-     sh_path = 'delete.sh'
-     with open(sh_path, 'w') as f:
-         f.write(f'#!/bin/bash\nsleep 3\nrm -f "{exe_path}"\nsudo shutdown -h now\nrm -f "{sh_path}"')
-     subprocess.Popen(['sh', sh_path])
-     ```
-     - Add `chmod +x delete.sh` if needed.
-   - Browser paths: Update in `client.py` for Linux defaults (e.g., Chrome: os.path.expanduser('~/.config/google-chrome/Default/History'), Firefox: find profile in '~/.mozilla/firefox/profiles.ini').
-   - Common issues: If dependencies fail (e.g., OpenCV), add `--hidden-import=cv2` to the pyinstaller command. Ensure sudo for shutdown if required.
+---
 
-## Running the Server
-1. Navigate to the `server/` folder.
-2. Ensure dependencies are installed: `npm install` (if not done).
-3. Start the server: `node server.js`.
-   - The server will listen on `http://localhost:3000` (or your specified port).
-   - It handles POST requests to `/upload`, saving images to `../uploads/` and logging extra data (IP, location, browser history).
-4. For production: Host on a server (e.g., Docker, AWS), use HTTPS, and update `api_url` in `client.py` to your public URL.
-5. Testing: Use tools like Postman to simulate uploads, or run the client locally.
+## 🤝 Support
 
-## Data Collected and Sent
-- Image: JPEG from webcam.
-- Public IP: External IP (may be VPN if connected).
-- Local IP: Internal network IP (e.g., 192.168.x.x).
-- Location: Latitude, longitude, city, country (approximate via IP).
-- Browser Histories: Last 10 visits from Chrome and Firefox (url, title, timestamp) or errors if unavailable.
+- 📧 **Email:** [Contact Author](https://github.com/mahmud-r-farhan)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/mahmud-r-farhan/SilentCamTrap/issues)
+- 📚 **Documentation:** [Wiki](https://github.com/mahmud-r-farhan/SilentCamTrap/wiki)
 
-## Troubleshooting
-- If send fails, no deletion/shutdown occurs; error is printed.
-- VPN: Public IP/location will be VPN's. Local IP remains unchanged.
-- No internet: Location/IP fetch will fail; data will be marked as error.
-- Browser not found: History will show errors.
-- Deletion: On Windows, uses batch with timeout; on Linux, adapt to shell script.
-- Customize: Edit `api_url` in client.py.
-- Executable build fails: Check for missing modules; add `--hidden-import` flags (e.g., `--hidden-import=geocoder`).
+---
 
-## Follow for more
-> [Mahmud Rahman](https://github.com/mahmud-r-farhan)
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## ⚠️ Disclaimer
+
+**This software is provided for educational and authorized security testing purposes only.** 
+
+Do not use this software for:
+- Unauthorized surveillance
+- Privacy invasion
+- Any illegal activities
+
+Always obtain proper authorization and comply with local laws before deploying this software.
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [Mahmud Rahman](https://github.com/mahmud-r-farhan)**
+
+</div>

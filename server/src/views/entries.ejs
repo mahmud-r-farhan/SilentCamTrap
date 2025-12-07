@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SilentCamTrap - All Entries">
+    <title>
+        <%= title %> | SilentCamTrap
+    </title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <%- include('partials/styles') %>
+</head>
+
+<body>
+    <div class="layout">
+        <%- include('partials/sidebar') %>
+
+            <main class="main-content">
+                <%- include('partials/header-bar') %>
+
+                    <div class="page-content">
+                        <!-- Page Header -->
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <div>
+                                <p style="color: var(--text-muted);">Showing <%= total %> total captures</p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary btn-sm" onclick="exportData()">
+                                    <i class="fas fa-download"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Entries Table -->
+                        <div class="card animate-fade-in">
+                            <% if (entries.length> 0) { %>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Image</th>
+                                                <th>Captured At</th>
+                                                <th>Location</th>
+                                                <th>Public IP</th>
+                                                <th>Local IP</th>
+                                                <th>System</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% entries.forEach(function(entry, index) { %>
+                                                <tr class="animate-fade-in"
+                                                    style="animation-delay: <%= index * 0.05 %>s">
+                                                    <td>
+                                                        <a href="/entry/<%= entry.id %>" style="display: block;">
+                                                            <img src="/uploads/<%= entry.imagePath %>" alt="Capture"
+                                                                class="thumbnail"
+                                                                style="transition: transform 0.3s; cursor: pointer;"
+                                                                onmouseover="this.style.transform='scale(1.1)'"
+                                                                onmouseout="this.style.transform='scale(1)'"
+                                                                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22><rect fill=%22%23334155%22 width=%22100%%22 height=%22100%%22/><text fill=%22%2364748b%22 x=%2225%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>N/A</text></svg>'">
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-weight: 500;">
+                                                            <%= new Date(entry.timestamp).toLocaleDateString() %>
+                                                        </div>
+                                                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                                            <%= new Date(entry.timestamp).toLocaleTimeString() %>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <% if (entry.extraData?.location?.city) { %>
+                                                            <div
+                                                                style="display: flex; align-items: center; gap: 0.5rem;">
+                                                                <i class="fas fa-map-marker-alt"
+                                                                    style="color: var(--primary);"></i>
+                                                                <div>
+                                                                    <div style="font-weight: 500;">
+                                                                        <%= entry.extraData.location.city %>
+                                                                    </div>
+                                                                    <div
+                                                                        style="font-size: 0.8rem; color: var(--text-muted);">
+                                                                        <%= entry.extraData.location.country %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <% } else { %>
+                                                                <span class="badge badge-warning">
+                                                                    <i class="fas fa-question-circle"></i>
+                                                                    Unknown
+                                                                </span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <code
+                                                            style="font-size: 0.8rem; color: var(--secondary); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                            <%= entry.extraData?.network?.public_ip || 'N/A' %>
+                                        </code>
+                                                    </td>
+                                                    <td>
+                                                        <code
+                                                            style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                            <%= entry.extraData?.network?.local_ip || 'N/A' %>
+                                        </code>
+                                                    </td>
+                                                    <td>
+                                                        <% if (entry.extraData?.system?.os_name) { %>
+                                                            <span class="badge badge-primary">
+                                                                <i
+                                                                    class="<%= entry.extraData.system.os_name === 'Windows' ? 'fab fa-windows' : entry.extraData.system.os_name === 'Darwin' ? 'fab fa-apple' : 'fab fa-linux' %>"></i>
+                                                                <%= entry.extraData.system.os_name %>
+                                                            </span>
+                                                            <% } else { %>
+                                                                <span style="color: var(--text-muted);">-</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-buttons">
+                                                            <a href="/entry/<%= entry.id %>"
+                                                                class="btn btn-icon btn-secondary" title="View Details">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                            <button class="btn btn-icon btn-danger"
+                                                                onclick="deleteEntry('<%= entry.id %>')" title="Delete">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <% if (totalPages> 1) { %>
+                                    <div
+                                        style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                                        <% if (page> 1) { %>
+                                            <a href="/entries?page=<%= page - 1 %>" class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-chevron-left"></i>
+                                                Previous
+                                            </a>
+                                            <% } %>
+
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <% let startPage=Math.max(1, page - 2); let
+                                                        endPage=Math.min(totalPages, page + 2); %>
+
+                                                        <% if (startPage> 1) { %>
+                                                            <a href="/entries?page=1" class="btn btn-secondary btn-sm"
+                                                                style="width: 36px;">1</a>
+                                                            <% if (startPage> 2) { %>
+                                                                <span
+                                                                    style="padding: 0.5rem; color: var(--text-muted);">...</span>
+                                                                <% } %>
+                                                                    <% } %>
+
+                                                                        <% for (let i=startPage; i <=endPage; i++) { %>
+                                                                            <a href="/entries?page=<%= i %>"
+                                                                                class="btn <%= i === page ? 'btn-primary' : 'btn-secondary' %> btn-sm"
+                                                                                style="width: 36px;">
+                                                                                <%= i %>
+                                                                            </a>
+                                                                            <% } %>
+
+                                                                                <% if (endPage < totalPages) { %>
+                                                                                    <% if (endPage < totalPages - 1) {
+                                                                                        %>
+                                                                                        <span
+                                                                                            style="padding: 0.5rem; color: var(--text-muted);">...</span>
+                                                                                        <% } %>
+                                                                                            <a href="/entries?page=<%= totalPages %>"
+                                                                                                class="btn btn-secondary btn-sm"
+                                                                                                style="width: 36px;">
+                                                                                                <%= totalPages %>
+                                                                                            </a>
+                                                                                            <% } %>
+                                                </div>
+
+                                                <% if (page < totalPages) { %>
+                                                    <a href="/entries?page=<%= page + 1 %>"
+                                                        class="btn btn-secondary btn-sm">
+                                                        Next
+                                                        <i class="fas fa-chevron-right"></i>
+                                                    </a>
+                                                    <% } %>
+                                    </div>
+                                    <% } %>
+
+                                        <% } else { %>
+                                            <div class="empty-state">
+                                                <i class="fas fa-camera-retro"></i>
+                                                <h3>No Captures Found</h3>
+                                                <p>Waiting for the first intruder detection...</p>
+                                            </div>
+                                            <% } %>
+                        </div>
+                    </div>
+            </main>
+    </div>
+
+    <%- include('partials/scripts') %>
+
+        <script>
+            function exportData() {
+                window.open('/api/entries?limit=10000', '_blank');
+            }
+        </script>
+</body>
+
+</html>
