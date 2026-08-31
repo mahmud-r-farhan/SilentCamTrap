@@ -259,7 +259,7 @@
 
         <script>
             // Initialize dashboard map
-            const recentLocations = <% - JSON.stringify(stats.recentLocations) %>;
+            const recentLocations = <%- JSON.stringify(stats.recentLocations) %>;
 
             const map = L.map('dashboard-map', {
                 zoomControl: false,
@@ -274,7 +274,9 @@
             const markerIcon = L.divIcon({
                 html: '<div style="width: 12px; height: 12px; background: #6366f1; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);"></div>',
                 className: 'custom-marker',
-                iconSize: [12, 12]
+                iconSize: [12, 12],
+                iconAnchor: [6, 6],
+                popupAnchor: [0, -8]
             });
 
             // Add markers

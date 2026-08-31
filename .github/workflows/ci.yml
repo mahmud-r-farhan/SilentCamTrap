@@ -1,0 +1,126 @@
+name: CI – Lint & Validate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  # ─────────────────────────────────────────
+  # Python linting & dependency check
+  # ─────────────────────────────────────────
+  python:
+    name: Python lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        working-directory: python
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+          pip install -r requirements.txt --dry-run
+
+      - name: Lint with flake8
+        working-directory: python
+        run: |
+          # Stop build on syntax errors or undefined names
+          flake8 client.py \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics
+
+          # Warn on style issues (max line length 120, skip blank lines)
+          flake8 client.py \
+            --count \
+            --max-line-length=120 \
+            --ignore=E501,W503,E203 \
+            --statistics \
+            --exit-zero
+
+      - name: Validate config.json
+        run: python -c "import json, sys; json.load(open('python/config.json')); print('config.json is valid JSON')"
+
+  # ─────────────────────────────────────────
+  # Node.js linting & dependency audit
+  # ─────────────────────────────────────────
+  node:
+    name: Node.js lint & audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Validate package.json
+        working-directory: server
+        run: node -e "require('./package.json'); console.log('package.json is valid')"
+
+      - name: Check server starts without errors (syntax check)
+        working-directory: server
+        run: node --check src/server.js && echo "Syntax OK"
+
+      - name: Security audit (non-blocking)
+        working-directory: server
+        run: npm audit --audit-level=high || true
+
+  # ─────────────────────────────────────────
+  # JSON / config validation
+  # ─────────────────────────────────────────
+  validate-configs:
+    name: Validate config files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate all JSON files
+        run: |
+          python3 -c "
+          import json, pathlib, sys
+          ok = True
+          for f in pathlib.Path('.').rglob('*.json'):
+              if any(p in f.parts for p in ['node_modules', '.git', 'dist', 'build']):
+                  continue
+              try:
+                  json.load(open(f))
+                  print(f'  OK  {f}')
+              except Exception as e:
+                  print(f'  FAIL {f}: {e}')
+                  ok = False
+          sys.exit(0 if ok else 1)
+          "
+
+      - name: Check .env.example has all required keys
+        run: |
+          python3 -c "
+          required = ['PORT', 'SESSION_SECRET', 'API_KEY', 'ADMIN_USERNAME', 'ADMIN_PASSWORD']
+          content = open('server/.env.example').read()
+          missing = [k for k in required if k + '=' not in content]
+          if missing:
+              print(f'Missing keys in .env.example: {missing}')
+              exit(1)
+          print('All required keys found in .env.example')
+          "

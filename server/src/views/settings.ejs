@@ -131,11 +131,16 @@ Content-Type: multipart/form-data</code>
 
                             <pre id="python-config"
                                 style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-size: 0.85rem; line-height: 1.6;"><code style="color: var(--text-secondary);">{
-  "api_url": "<span style="color: var(--primary-light);">http://your-server:3000/api/upload</span>",
+  "api_url": "<span style="color: var(--primary-light);">http://your-server-url/api/upload</span>",
+  "api_key": "<span style="color: var(--warning);">default-api-key</span>",
   "log_folder": "<span style="color: var(--success);">intruder_logs</span>",
   "webcam_index": <span style="color: var(--warning);">0</span>,
-  "webcam_warmup_seconds": <span style="color: var(--warning);">0.5</span>,
+  "webcam_warmup_seconds": <span style="color: var(--warning);">0.8</span>,
+  "webcam_frame_count": <span style="color: var(--warning);">10</span>,
   "connection_timeout": <span style="color: var(--warning);">30</span>,
+  "send_retries": <span style="color: var(--warning);">3</span>,
+  "send_retry_delay": <span style="color: var(--warning);">2.0</span>,
+  "collection_timeout": <span style="color: var(--warning);">20</span>,
   "enable_shutdown": <span style="color: var(--danger);">false</span>,
   "enable_self_delete": <span style="color: var(--danger);">false</span>,
   "enable_browser_history": <span style="color: var(--success);">true</span>,
@@ -202,20 +207,38 @@ Content-Type: multipart/form-data</code>
 
         <script>
             function copyConfig() {
-                const config = `{
-  "api_url": "http://your-server:3000/api/upload",
-  "log_folder": "intruder_logs",
-  "webcam_index": 0,
-  "webcam_warmup_seconds": 0.5,
-  "connection_timeout": 30,
-  "enable_shutdown": false,
-  "enable_self_delete": false,
-  "enable_browser_history": true,
-  "max_browser_history": 10,
-  "log_level": "INFO"
-}`;
+                const config = JSON.stringify({
+                    "api_url": "http://localhost:3000/api/upload",
+                    "api_key": "default-api-key",
+                    "log_folder": "intruder_logs",
+                    "webcam_index": 0,
+                    "webcam_warmup_seconds": 0.8,
+                    "webcam_frame_count": 10,
+                    "connection_timeout": 30,
+                    "send_retries": 3,
+                    "send_retry_delay": 2.0,
+                    "collection_timeout": 20,
+                    "enable_shutdown": false,
+                    "enable_self_delete": false,
+                    "enable_browser_history": true,
+                    "max_browser_history": 10,
+                    "log_level": "INFO"
+                }, null, 2);
                 navigator.clipboard.writeText(config).then(() => {
-                    alert('Configuration copied to clipboard!');
+                    const toast = document.createElement('div');
+                    toast.textContent = '✓ Configuration copied to clipboard';
+                    toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#10b981;color:#fff;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,0.4);transition:opacity 0.3s;';
+                    document.body.appendChild(toast);
+                    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2500);
+                }).catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = config;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
                 });
             }
         </script>

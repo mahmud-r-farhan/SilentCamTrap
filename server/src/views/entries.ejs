@@ -32,10 +32,14 @@
                                 <p style="color: var(--text-muted);">Showing <%= total %> total captures</p>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-secondary btn-sm" onclick="exportData()">
-                                    <i class="fas fa-download"></i>
-                                    Export
-                                </button>
+                                <a href="/api/export/csv" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-file-csv"></i>
+                                    Export CSV
+                                </a>
+                                <a href="/api/export/json" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-file-code"></i>
+                                    Export JSON
+                                </a>
                             </div>
                         </div>
 
@@ -51,6 +55,7 @@
                                                 <th>Location</th>
                                                 <th>Public IP</th>
                                                 <th>Local IP</th>
+                                                <th>Username</th>
                                                 <th>System</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -63,10 +68,7 @@
                                                         <a href="/entry/<%= entry.id %>" style="display: block;">
                                                             <img src="/uploads/<%= entry.imagePath %>" alt="Capture"
                                                                 class="thumbnail"
-                                                                style="transition: transform 0.3s; cursor: pointer;"
-                                                                onmouseover="this.style.transform='scale(1.1)'"
-                                                                onmouseout="this.style.transform='scale(1)'"
-                                                                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22><rect fill=%22%23334155%22 width=%22100%%22 height=%22100%%22/><text fill=%22%2364748b%22 x=%2225%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>N/A</text></svg>'">
+                                                                onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22><rect fill=%22%23334155%22 width=%22100%25%22 height=%22100%25%22/><text fill=%22%2364748b%22 x=%2225%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>N/A</text></svg>'">
                                                         </a>
                                                     </td>
                                                     <td>
@@ -103,14 +105,23 @@
                                                     <td>
                                                         <code
                                                             style="font-size: 0.8rem; color: var(--secondary); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
-                                            <%= entry.extraData?.network?.public_ip || 'N/A' %>
-                                        </code>
+                                                            <%= entry.extraData?.network?.public_ip || 'N/A' %>
+                                                        </code>
                                                     </td>
                                                     <td>
                                                         <code
                                                             style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
-                                            <%= entry.extraData?.network?.local_ip || 'N/A' %>
-                                        </code>
+                                                            <%= entry.extraData?.network?.local_ip || 'N/A' %>
+                                                        </code>
+                                                    </td>
+                                                    <td>
+                                                        <% if (entry.extraData?.system?.username) { %>
+                                                            <code style="font-size: 0.8rem; color: var(--warning); background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                                                <%= entry.extraData.system.username %>
+                                                            </code>
+                                                        <% } else { %>
+                                                            <span style="color: var(--text-muted);">-</span>
+                                                        <% } %>
                                                     </td>
                                                     <td>
                                                         <% if (entry.extraData?.system?.os_name) { %>
@@ -211,11 +222,10 @@
 
     <%- include('partials/scripts') %>
 
-        <script>
-            function exportData() {
-                window.open('/api/entries?limit=10000', '_blank');
-            }
-        </script>
+    <style>
+        .thumbnail:hover { transform: scale(1.1); }
+    </style>
+
 </body>
 
 </html>

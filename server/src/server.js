@@ -41,7 +41,8 @@ const config = {
     uploadDir: process.env.UPLOAD_DIR || path.join(__dirname, '../data/uploads'),
     logsDir: process.env.LOGS_DIR || path.join(__dirname, '../data/logs'),
     enableAuth: process.env.ENABLE_AUTH !== 'false',
-    enableRateLimit: process.env.ENABLE_RATE_LIMIT !== 'false'
+    enableRateLimit: process.env.ENABLE_RATE_LIMIT !== 'false',
+    webhookUrl: process.env.WEBHOOK_URL || null   // optional: POST alert on new capture
 };
 
 // =============================================================================
@@ -69,7 +70,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com', 'https://unpkg.com'],
             fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdnjs.cloudflare.com', 'https://unpkg.com'],
-            imgSrc: ["'self'", 'data:', 'blob:', '*', 'https://*.basemaps.cartocdn.com', 'https://*.tile.openstreetmap.org'],
+            imgSrc: ["'self'", 'data:', 'blob:', '*', 'https://*.basemaps.cartocdn.com', 'https://*.tile.openstreetmap.org', 'https://server.arcgisonline.com', 'https://*.tile.opentopomap.org'],
             connectSrc: ["'self'"]
         }
     }
@@ -291,7 +292,11 @@ const requireAuth = (req, res, next) => {
 };
 
 const requireApiKey = (req, res, next) => {
-    const apiKey = req.headers['x-api-key'] || req.query.apiKey;
+    // Accept X-API-KEY, x-api-key, or ?apiKey= query param
+    const apiKey =
+        req.headers['x-api-key'] ||
+        req.headers['X-API-KEY'] ||
+        req.query.apiKey;
 
     if (!config.enableAuth || apiKey === config.apiKey) {
         return next();
@@ -299,6 +304,60 @@ const requireApiKey = (req, res, next) => {
 
     res.status(401).json({ error: 'Invalid API key' });
 };
+
+// =============================================================================
+// Webhook Notification
+// =============================================================================
+
+/**
+ * Send a webhook POST when a new intruder capture arrives.
+ * @param {object} entry - The new dataStore entry
+ */
+async function sendWebhook(entry) {
+    if (!config.webhookUrl) return;
+    try {
+        const https = require('https');
+        const http = require('http');
+        const url = new URL(config.webhookUrl);
+        const body = JSON.stringify({
+            event: 'new_capture',
+            id: entry.id,
+            timestamp: entry.timestamp,
+            ip: entry.extraData?.network?.public_ip || entry.clientIp || 'Unknown',
+            location: {
+                city: entry.extraData?.location?.city || null,
+                country: entry.extraData?.location?.country || null,
+                lat: entry.extraData?.location?.latitude || null,
+                lng: entry.extraData?.location?.longitude || null,
+            },
+            system: {
+                username: entry.extraData?.system?.username || null,
+                os: `${entry.extraData?.system?.os_name || ''} ${entry.extraData?.system?.os_release || ''}`.trim(),
+            },
+        });
+
+        const options = {
+            hostname: url.hostname,
+            port: url.port || (url.protocol === 'https:' ? 443 : 80),
+            path: url.pathname + url.search,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(body),
+                'User-Agent': 'SilentCamTrap/1.0',
+            },
+        };
+
+        const transport = url.protocol === 'https:' ? https : http;
+        const req = transport.request(options);
+        req.on('error', () => {}); // ignore webhook errors silently
+        req.write(body);
+        req.end();
+        console.log(`[Webhook] Notification sent to ${config.webhookUrl}`);
+    } catch (err) {
+        console.warn('[Webhook] Failed to send notification:', err.message);
+    }
+}
 
 // =============================================================================
 // Helper: Render with Layout
@@ -461,8 +520,12 @@ app.post('/api/upload', requireApiKey, upload.fields([
         console.log(`[${new Date().toISOString()}] New intruder captured:`, {
             id: entry.id,
             ip: extraData.network?.public_ip || 'Unknown',
-            location: extraData.location?.city || 'Unknown'
+            location: extraData.location?.city || 'Unknown',
+            user: extraData.system?.username || 'Unknown',
         });
+
+        // Fire webhook notification (non-blocking)
+        sendWebhook(entry).catch(() => {});
 
         res.status(200).json({
             success: true,
@@ -576,6 +639,75 @@ app.get('/api/stats', requireAuth, (req, res) => {
     });
 });
 
+// Export all entries as CSV
+app.get('/api/export/csv', requireAuth, (req, res) => {
+    const entries = dataStore.getAll(10000);
+
+    const headers = [
+        'id', 'timestamp', 'client_ip',
+        'public_ip', 'local_ip', 'hostname', 'mac_address', 'wifi_ssid',
+        'latitude', 'longitude', 'city', 'state', 'country', 'isp', 'timezone',
+        'os_name', 'os_release', 'machine', 'processor',
+        'username', 'screen_width', 'screen_height',
+        'ram_total_gb', 'disk_free_gb', 'battery_percent', 'uptime_seconds',
+        'image_path'
+    ];
+
+    const escape = (v) => {
+        if (v === null || v === undefined) return '';
+        const s = String(v);
+        return s.includes(',') || s.includes('"') || s.includes('\n')
+            ? `"${s.replace(/"/g, '""')}"`
+            : s;
+    };
+
+    const rows = entries.map(e => [
+        e.id,
+        e.timestamp,
+        e.clientIp || '',
+        e.extraData?.network?.public_ip || '',
+        e.extraData?.network?.local_ip || '',
+        e.extraData?.network?.hostname || '',
+        e.extraData?.network?.mac_address || '',
+        e.extraData?.network?.wifi_ssid || '',
+        e.extraData?.location?.latitude || '',
+        e.extraData?.location?.longitude || '',
+        e.extraData?.location?.city || '',
+        e.extraData?.location?.state || '',
+        e.extraData?.location?.country || '',
+        e.extraData?.location?.isp || '',
+        e.extraData?.location?.timezone || '',
+        e.extraData?.system?.os_name || '',
+        e.extraData?.system?.os_release || '',
+        e.extraData?.system?.machine || '',
+        e.extraData?.system?.processor || '',
+        e.extraData?.system?.username || '',
+        e.extraData?.system?.screen_width || '',
+        e.extraData?.system?.screen_height || '',
+        e.extraData?.system?.ram_total_gb || '',
+        e.extraData?.system?.disk_free_gb || '',
+        e.extraData?.system?.battery_percent || '',
+        e.extraData?.system?.uptime_seconds || '',
+        e.imagePath || '',
+    ].map(escape).join(','));
+
+    const csv = [headers.join(','), ...rows].join('\r\n');
+    const filename = `silentcamtrap_export_${new Date().toISOString().split('T')[0]}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send('\uFEFF' + csv); // BOM for Excel compatibility
+});
+
+// Export all entries as JSON
+app.get('/api/export/json', requireAuth, (req, res) => {
+    const entries = dataStore.getAll(10000);
+    const filename = `silentcamtrap_export_${new Date().toISOString().split('T')[0]}.json`;
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.json({ exported_at: new Date().toISOString(), count: entries.length, data: entries });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
@@ -625,12 +757,14 @@ app.use((err, req, res, next) => {
 app.listen(config.port, () => {
     console.log(`
 ╔══════════════════════════════════════════════════════════════╗
-║                    🔒 SilentCamTrap Server                    ║
+║                 🔒  SilentCamTrap Server                      ║
 ╠══════════════════════════════════════════════════════════════╣
-║  Server running on: http://localhost:${config.port.toString().padEnd(26)}║
+║  Dashboard : http://localhost:${config.port.toString().padEnd(29)}║
 ║  Environment: ${config.nodeEnv.padEnd(44)}║
 ║  Auth enabled: ${config.enableAuth.toString().padEnd(43)}║
-║  Default login: admin / admin123                             ║
+║  Webhook  : ${(config.webhookUrl || 'disabled').slice(0, 46).padEnd(47)}║
+║  Login    : admin / admin123  (change in .env!)              ║
+║  Export   : GET /api/export/csv  or  /api/export/json        ║
 ╚══════════════════════════════════════════════════════════════╝
     `);
 });

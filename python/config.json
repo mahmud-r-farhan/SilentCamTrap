@@ -1,12 +1,17 @@
 {
-    "api_url": "http://localhost:3000/api/upload",
-    "log_folder": "intruder_logs",
-    "webcam_index": 0,
-    "webcam_warmup_seconds": 0.5,
-    "connection_timeout": 30,
-    "enable_shutdown": false,
-    "enable_self_delete": false,
-    "enable_browser_history": true,
-    "max_browser_history": 10,
-    "log_level": "INFO"
+  "api_url": "http://localhost:3000/api/upload",
+  "api_key": "default-api-key",
+  "log_folder": "intruder_logs",
+  "webcam_index": 0,
+  "webcam_warmup_seconds": 0.8,
+  "webcam_frame_count": 10,
+  "connection_timeout": 30,
+  "send_retries": 3,
+  "send_retry_delay": 2.0,
+  "collection_timeout": 20,
+  "enable_shutdown": false,
+  "enable_self_delete": false,
+  "enable_browser_history": true,
+  "max_browser_history": 10,
+  "log_level": "INFO"
 }
