@@ -111,16 +111,17 @@ Create a `.env` file in the `server` directory:
 
 ```env
 # Server Configuration
-NODE_ENV=production
+NODE_ENV=development
 PORT=3000
 
 # Security
-SESSION_SECRET=your-super-secret-session-key
-API_KEY=your-api-key-for-client-authentication
+SESSION_SECRET=your-super-secret-session-key-change-in-production
+# API_KEY must match the api_key in python/config.json
+API_KEY=default-api-key
 
-# Admin Credentials
+# Admin Credentials (change these!)
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your-secure-password
+ADMIN_PASSWORD=admin123
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
@@ -128,6 +129,18 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 # File Upload
 MAX_FILE_SIZE_MB=10
+UPLOAD_DIR=./data/uploads
+LOGS_DIR=./data/logs
+
+# Features
+ENABLE_AUTH=true
+ENABLE_RATE_LIMIT=true
+
+# Webhook (optional) — POST JSON alert to this URL on every new capture
+# Leave empty to disable. Supports Discord, Slack, custom endpoints, etc.
+# WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
+WEBHOOK_URL=
+
 ```
 
 #### 2. Running the Server
@@ -162,11 +175,16 @@ Edit `config.json` in the `python` directory:
 
 ```json
 {
-  "api_url": "http://your-server:3000/api/upload",
+  "api_url": "http://localhost:3000/api/upload",
+  "api_key": "default-api-key",
   "log_folder": "intruder_logs",
   "webcam_index": 0,
-  "webcam_warmup_seconds": 0.5,
+  "webcam_warmup_seconds": 0.8,
+  "webcam_frame_count": 10,
   "connection_timeout": 30,
+  "send_retries": 3,
+  "send_retry_delay": 2.0,
+  "collection_timeout": 20,
   "enable_shutdown": false,
   "enable_self_delete": false,
   "enable_browser_history": true,
