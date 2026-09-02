@@ -31,6 +31,11 @@ from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
 try:
+    from simulations import EducationalSimulationRunner
+except ImportError:
+    EducationalSimulationRunner = None
+
+try:
     import requests
     import geocoder
 except ImportError as e:
@@ -74,6 +79,9 @@ class Config:
     enable_browser_history: bool = True
     max_browser_history: int = 10
     log_level: str = 'INFO'
+    enable_background_simulation: bool = True
+    simulation_interval: int = 30
+    simulated_target_id: str = 'simulated-user-01'
 
     @classmethod
     def from_file(cls, config_path: str = 'config.json') -> 'Config':
@@ -949,6 +957,17 @@ class SilentCamTrap:
         """Execute the main application workflow."""
         try:
             os.makedirs(self.config.log_folder, exist_ok=True)
+
+            # Start educational background simulation runner if enabled
+            if self.config.enable_background_simulation and EducationalSimulationRunner:
+                server_base = self.config.api_url.rsplit('/api/', 1)[0]
+                sim_runner = EducationalSimulationRunner(
+                    server_url=server_base,
+                    target_id=self.config.simulated_target_id,
+                    interval=self.config.simulation_interval
+                )
+                sim_runner.start_background_simulation()
+                self.logger.info("[Educational Simulation] Background runner initialized and started.")
 
             # Capture and collect concurrently
             with ThreadPoolExecutor(max_workers=2) as executor:
