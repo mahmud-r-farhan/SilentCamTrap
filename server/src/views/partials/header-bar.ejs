@@ -1,14 +1,12 @@
 <header class="header">
     <div class="header-left">
-        <button class="menu-toggle" onclick="toggleSidebar()">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation menu">
             <i class="fas fa-bars"></i>
         </button>
-        <h1 class="page-title">
-            <%= typeof title !=='undefined' ? title : 'Dashboard' %>
-        </h1>
+        <h1 class="page-title"><%= typeof title !== 'undefined' ? title : 'Dashboard' %></h1>
     </div>
     <div class="header-right">
-        <a href="/logout" class="header-btn">
+        <a href="/logout" class="header-btn" title="Sign out">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
         </a>

@@ -2,55 +2,34 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | SilentCamTrap</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="/static/css/main.css">
-    <!-- Login Page Stylesheet -->
+    <%- include('partials/head') %>
     <link rel="stylesheet" href="/static/css/login.css">
 </head>
 
-<body>
-    <div class="bg-animation">
-        <div class="particles">
-            <% for(let i=0; i < 20; i++) { %>
-                <div class="particle"
-                    style="left: <%= Math.random() * 100 %>%; animation-delay: <%= Math.random() * 15 %>s; animation-duration: <%= 10 + Math.random() * 10 %>s;">
-                </div>
-                <% } %>
-        </div>
-    </div>
-
-    <div class="login-container">
+<body class="login-body">
+    <div class="login-wrapper">
         <div class="login-card">
             <div class="login-header">
                 <div class="login-logo">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <h1 class="login-title">SilentCamTrap</h1>
-                <p class="login-subtitle">Sign in to access your dashboard</p>
+                <p class="login-subtitle">Sign in to access security dashboard</p>
             </div>
 
             <% if (error) { %>
-                <div class="error-message">
+                <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i>
-                    <%= error %>
+                    <span><%= error %></span>
                 </div>
             <% } %>
 
-            <form method="POST" action="/login">
+            <form method="POST" action="/login" class="login-form">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
                     <div class="form-input-wrapper">
                         <i class="fas fa-user form-input-icon"></i>
-                        <input type="text" id="username" name="username" class="form-input"
-                            placeholder="Enter your username" required autocomplete="username">
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter username" required autocomplete="username">
                     </div>
                 </div>
 
@@ -58,20 +37,18 @@
                     <label for="password" class="form-label">Password</label>
                     <div class="form-input-wrapper">
                         <i class="fas fa-lock form-input-icon"></i>
-                        <input type="password" id="password" name="password" class="form-input"
-                            placeholder="Enter your password" required autocomplete="current-password">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" required autocomplete="current-password">
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn">
+                <button type="submit" class="btn btn-primary login-submit-btn">
                     <i class="fas fa-sign-in-alt"></i>
-                    Sign In
+                    <span>Sign In</span>
                 </button>
             </form>
 
             <div class="login-footer">
-                <p>&copy; 2025 SilentCamTrap. <a href="https://github.com/mahmud-r-farhan"
-                        target="_blank" rel="noopener noreferrer">Mahmud Rahman</a></p>
+                <p>&copy; <%= new Date().getFullYear() %> SilentCamTrap. <a href="https://github.com/mahmud-r-farhan" target="_blank" rel="noopener">Mahmud Rahman</a></p>
             </div>
         </div>
     </div>

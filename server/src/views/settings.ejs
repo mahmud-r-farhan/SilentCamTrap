@@ -2,246 +2,200 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SilentCamTrap - Settings">
-    <title>
-        <%= title %> | SilentCamTrap
-    </title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <%- include('partials/styles') %>
+    <%- include('partials/head') %>
 </head>
 
 <body>
     <div class="layout">
         <%- include('partials/sidebar') %>
 
-            <main class="main-content">
-                <%- include('partials/header-bar') %>
+        <main class="main-content">
+            <%- include('partials/header-bar') %>
 
-                    <div class="page-content">
-                        <div class="grid-2">
-                            <!-- General Settings -->
-                            <div class="card animate-fade-in">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-cog" style="margin-right: 0.5rem; color: var(--primary);"></i>
-                                        General Settings
-                                    </h3>
-                                </div>
-
-                                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                        <div>
-                                            <div style="font-weight: 500;">Authentication</div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">Require login to
-                                                access dashboard</div>
-                                        </div>
-                                        <span
-                                            class="badge <%= config.enableAuth ? 'badge-success' : 'badge-warning' %>">
-                                            <i class="fas fa-<%= config.enableAuth ? 'check' : 'times' %>"></i>
-                                            <%= config.enableAuth ? 'Enabled' : 'Disabled' %>
-                                        </span>
-                                    </div>
-
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                        <div>
-                                            <div style="font-weight: 500;">Rate Limiting</div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">Protect API from
-                                                abuse</div>
-                                        </div>
-                                        <span
-                                            class="badge <%= config.enableRateLimit ? 'badge-success' : 'badge-warning' %>">
-                                            <i class="fas fa-<%= config.enableRateLimit ? 'check' : 'times' %>"></i>
-                                            <%= config.enableRateLimit ? 'Enabled' : 'Disabled' %>
-                                        </span>
-                                    </div>
-
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                        <div>
-                                            <div style="font-weight: 500;">Max File Size</div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">Maximum upload
-                                                size in MB</div>
-                                        </div>
-                                        <span class="badge badge-primary">
-                                            <i class="fas fa-file"></i>
-                                            <%= config.maxFileSizeMB %> MB
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- API Configuration -->
-                            <div class="card animate-fade-in" style="animation-delay: 0.1s;">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-plug"
-                                            style="margin-right: 0.5rem; color: var(--secondary);"></i>
-                                        API Configuration
-                                    </h3>
-                                </div>
-
-                                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                                    <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                        <div style="font-weight: 500; margin-bottom: 0.5rem;">Upload Endpoint</div>
-                                        <code
-                                            style="display: block; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; color: var(--primary-light); font-size: 0.9rem;">
-                                    POST /api/upload
-                                </code>
-                                    </div>
-
-                                    <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                        <div style="font-weight: 500; margin-bottom: 0.5rem;">Health Check</div>
-                                        <code
-                                            style="display: block; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; color: var(--success); font-size: 0.9rem;">
-                                    GET /api/health
-                                </code>
-                                    </div>
-
-                                    <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                        <div style="font-weight: 500; margin-bottom: 0.5rem;">Headers Required</div>
-                                        <code
-                                            style="display: block; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; color: var(--warning); font-size: 0.85rem; white-space: pre-wrap;">X-API-Key: your-api-key
-Content-Type: multipart/form-data</code>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="page-content">
+                <div class="grid-2">
+                    <!-- General Settings -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-cog text-primary"></i>
+                                General Settings
+                            </h3>
                         </div>
 
-                        <!-- Python Client Configuration -->
-                        <div class="card animate-fade-in" style="animation-delay: 0.2s; margin-top: 1.5rem;">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fab fa-python" style="margin-right: 0.5rem; color: #3776ab;"></i>
-                                    Python Client Configuration
-                                </h3>
-                                <button class="btn btn-secondary btn-sm" onclick="copyConfig()">
-                                    <i class="fas fa-copy"></i>
-                                    Copy
-                                </button>
+                        <div class="settings-list">
+                            <div class="settings-item">
+                                <div>
+                                    <div class="font-medium">Authentication</div>
+                                    <div class="text-xs text-muted">Require login to access dashboard</div>
+                                </div>
+                                <span class="badge <%= config.enableAuth ? 'badge-success' : 'badge-warning' %>">
+                                    <i class="fas fa-<%= config.enableAuth ? 'check' : 'times' %>"></i>
+                                    <%= config.enableAuth ? 'Enabled' : 'Disabled' %>
+                                </span>
                             </div>
 
-                            <pre id="python-config"
-                                style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-size: 0.85rem; line-height: 1.6;"><code style="color: var(--text-secondary);">{
-  "api_url": "<span style="color: var(--primary-light);">http://your-server-url/api/upload</span>",
-  "api_key": "<span style="color: var(--warning);">default-api-key</span>",
-  "log_folder": "<span style="color: var(--success);">intruder_logs</span>",
-  "webcam_index": <span style="color: var(--warning);">0</span>,
-  "webcam_warmup_seconds": <span style="color: var(--warning);">0.8</span>,
-  "webcam_frame_count": <span style="color: var(--warning);">10</span>,
-  "connection_timeout": <span style="color: var(--warning);">30</span>,
-  "send_retries": <span style="color: var(--warning);">3</span>,
-  "send_retry_delay": <span style="color: var(--warning);">2.0</span>,
-  "collection_timeout": <span style="color: var(--warning);">20</span>,
-  "enable_shutdown": <span style="color: var(--danger);">false</span>,
-  "enable_self_delete": <span style="color: var(--danger);">false</span>,
-  "enable_browser_history": <span style="color: var(--success);">true</span>,
-  "max_browser_history": <span style="color: var(--warning);">10</span>,
-  "log_level": "<span style="color: var(--secondary);">INFO</span>"
-}</code></pre>
-                        </div>
-
-                        <!-- Docker Quick Start -->
-                        <div class="card animate-fade-in" style="animation-delay: 0.3s; margin-top: 1.5rem;">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fab fa-docker" style="margin-right: 0.5rem; color: #2496ed;"></i>
-                                    Docker Quick Start
-                                </h3>
+                            <div class="settings-item">
+                                <div>
+                                    <div class="font-medium">Rate Limiting</div>
+                                    <div class="text-xs text-muted">Protect API from abuse</div>
+                                </div>
+                                <span class="badge <%= config.enableRateLimit ? 'badge-success' : 'badge-warning' %>">
+                                    <i class="fas fa-<%= config.enableRateLimit ? 'check' : 'times' %>"></i>
+                                    <%= config.enableRateLimit ? 'Enabled' : 'Disabled' %>
+                                </span>
                             </div>
 
-                            <div style="display: grid; gap: 1rem;">
-                                <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                    <div
-                                        style="font-weight: 500; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                        <span
-                                            style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">1</span>
-                                        Build Docker Image
-                                    </div>
-                                    <code
-                                        style="display: block; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; color: var(--secondary); font-size: 0.85rem;">
-                                docker build -t silentcamtrap-server .
-                            </code>
+                            <div class="settings-item">
+                                <div>
+                                    <div class="font-medium">Max File Size</div>
+                                    <div class="text-xs text-muted">Maximum upload size in MB</div>
                                 </div>
-
-                                <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                    <div
-                                        style="font-weight: 500; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                        <span
-                                            style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">2</span>
-                                        Run Container
-                                    </div>
-                                    <code
-                                        style="display: block; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; color: var(--secondary); font-size: 0.85rem;">
-                                docker run -d -p 3000:3000 -v ./data:/app/data silentcamtrap-server
-                            </code>
-                                </div>
-
-                                <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 10px;">
-                                    <div
-                                        style="font-weight: 500; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                        <span
-                                            style="background: var(--success); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">✓</span>
-                                        Access Dashboard
-                                    </div>
-                                    <code
-                                        style="display: block; padding: 0.75rem; background: var(--bg-primary); border-radius: 6px; color: var(--primary-light); font-size: 0.85rem;">
-                                http://localhost:3000
-                            </code>
-                                </div>
+                                <span class="badge badge-primary">
+                                    <i class="fas fa-file"></i>
+                                    <%= config.maxFileSizeMB %> MB
+                                </span>
                             </div>
                         </div>
                     </div>
-            </main>
+
+                    <!-- API Configuration -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-plug text-secondary"></i>
+                                API Configuration
+                            </h3>
+                        </div>
+
+                        <div class="settings-list">
+                            <div class="settings-box">
+                                <div class="font-medium mb-1">Upload Endpoint</div>
+                                <code class="code-block primary">POST /api/upload</code>
+                            </div>
+
+                            <div class="settings-box">
+                                <div class="font-medium mb-1">Health Check</div>
+                                <code class="code-block success">GET /api/health</code>
+                            </div>
+
+                            <div class="settings-box">
+                                <div class="font-medium mb-1">Headers Required</div>
+                                <code class="code-block warning">X-API-Key: your-api-key
+Content-Type: multipart/form-data</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Python Client Configuration -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fab fa-python python-icon"></i>
+                            Python Client Configuration
+                        </h3>
+                        <button class="btn btn-secondary btn-sm" onclick="copyConfig()">
+                            <i class="fas fa-copy"></i>
+                            Copy Config
+                        </button>
+                    </div>
+
+                    <pre id="python-config" class="json-viewer"><code class="text-secondary">{
+  "api_url": "<span class="text-primary-light">http://your-server-url/api/upload</span>",
+  "api_key": "<span class="text-warning">default-api-key</span>",
+  "log_folder": "<span class="text-success">intruder_logs</span>",
+  "webcam_index": <span class="text-warning">0</span>,
+  "webcam_warmup_seconds": <span class="text-warning">0.8</span>,
+  "webcam_frame_count": <span class="text-warning">10</span>,
+  "connection_timeout": <span class="text-warning">30</span>,
+  "send_retries": <span class="text-warning">3</span>,
+  "send_retry_delay": <span class="text-warning">2.0</span>,
+  "collection_timeout": <span class="text-warning">20</span>,
+  "enable_shutdown": <span class="text-danger">false</span>,
+  "enable_self_delete": <span class="text-danger">false</span>,
+  "enable_browser_history": <span class="text-success">true</span>,
+  "max_browser_history": <span class="text-warning">10</span>,
+  "log_level": "<span class="text-secondary">INFO</span>"
+}</code></pre>
+                </div>
+
+                <!-- Docker Quick Start -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fab fa-docker docker-icon"></i>
+                            Docker Quick Start
+                        </h3>
+                    </div>
+
+                    <div class="docker-grid">
+                        <div class="docker-step">
+                            <div class="docker-step-header">
+                                <span class="step-badge">1</span>
+                                Build Docker Image
+                            </div>
+                            <code class="code-block secondary">docker build -t silentcamtrap-server .</code>
+                        </div>
+
+                        <div class="docker-step">
+                            <div class="docker-step-header">
+                                <span class="step-badge">2</span>
+                                Run Container
+                            </div>
+                            <code class="code-block secondary">docker run -d -p 3000:3000 -v ./data:/app/data silentcamtrap-server</code>
+                        </div>
+
+                        <div class="docker-step">
+                            <div class="docker-step-header">
+                                <span class="step-badge success">✓</span>
+                                Access Dashboard
+                            </div>
+                            <code class="code-block primary">http://localhost:3000</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <%- include('partials/scripts') %>
 
-        <script>
-            function copyConfig() {
-                const config = JSON.stringify({
-                    "api_url": "http://localhost:3000/api/upload",
-                    "api_key": "default-api-key",
-                    "log_folder": "intruder_logs",
-                    "webcam_index": 0,
-                    "webcam_warmup_seconds": 0.8,
-                    "webcam_frame_count": 10,
-                    "connection_timeout": 30,
-                    "send_retries": 3,
-                    "send_retry_delay": 2.0,
-                    "collection_timeout": 20,
-                    "enable_shutdown": false,
-                    "enable_self_delete": false,
-                    "enable_browser_history": true,
-                    "max_browser_history": 10,
-                    "log_level": "INFO"
-                }, null, 2);
-                navigator.clipboard.writeText(config).then(() => {
-                    const toast = document.createElement('div');
-                    toast.textContent = '✓ Configuration copied to clipboard';
-                    toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#10b981;color:#fff;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,0.4);transition:opacity 0.3s;';
-                    document.body.appendChild(toast);
-                    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2500);
-                }).catch(() => {
-                    const ta = document.createElement('textarea');
-                    ta.value = config;
-                    ta.style.position = 'fixed';
-                    ta.style.opacity = '0';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    ta.remove();
-                });
-            }
-        </script>
+    <script>
+        function copyConfig() {
+            const configText = JSON.stringify({
+                "api_url": "http://localhost:3000/api/upload",
+                "api_key": "default-api-key",
+                "log_folder": "intruder_logs",
+                "webcam_index": 0,
+                "webcam_warmup_seconds": 0.8,
+                "webcam_frame_count": 10,
+                "connection_timeout": 30,
+                "send_retries": 3,
+                "send_retry_delay": 2.0,
+                "collection_timeout": 20,
+                "enable_shutdown": false,
+                "enable_self_delete": false,
+                "enable_browser_history": true,
+                "max_browser_history": 10,
+                "log_level": "INFO"
+            }, null, 2);
+
+            navigator.clipboard.writeText(configText).then(() => {
+                showToast('Configuration copied to clipboard', 'success');
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = configText;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                showToast('Configuration copied to clipboard', 'success');
+            });
+        }
+    </script>
 </body>
 
 </html>

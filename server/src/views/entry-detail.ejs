@@ -2,429 +2,323 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SilentCamTrap - Entry Details">
-    <title>
-        <%= title %> | SilentCamTrap
-    </title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-
-    <%- include('partials/styles') %>
+    <%- include('partials/head') %>
+    <% if (entry.extraData?.location?.latitude) { %>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <% } %>
 </head>
 
 <body>
     <div class="layout">
         <%- include('partials/sidebar') %>
 
-            <main class="main-content">
-                <%- include('partials/header-bar') %>
+        <main class="main-content">
+            <%- include('partials/header-bar') %>
 
-                    <div class="page-content">
-                        <div style="margin-bottom: 1.5rem;">
-                            <a href="/entries" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-arrow-left"></i>
-                                Back to Entries
-                            </a>
+            <div class="page-content">
+                <div class="mb-4">
+                    <a href="/entries" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Entries
+                    </a>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Image Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-camera text-primary"></i>
+                                Captured Image
+                            </h3>
+                            <span class="badge badge-primary">
+                                <i class="fas fa-clock"></i>
+                                <%= new Date(entry.timestamp).toLocaleString() %>
+                            </span>
                         </div>
 
-                        <div class="grid-2">
-                            <!-- Image Card -->
-                            <div class="card animate-fade-in">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-camera"
-                                            style="margin-right: 0.5rem; color: var(--primary);"></i>
-                                        Captured Image
-                                    </h3>
-                                    <span class="badge badge-primary">
-                                        <i class="fas fa-clock"></i>
-                                        <%= new Date(entry.timestamp).toLocaleString() %>
-                                    </span>
-                                </div>
+                        <div class="capture-image-wrap">
+                            <img src="/uploads/<%= entry.imagePath %>" alt="Intruder Capture" id="capture-img" class="capture-img" onerror="this.style.display='none'; document.getElementById('img-fallback').style.display='flex'">
+                            <div id="img-fallback" class="img-fallback">
+                                <i class="fas fa-camera-slash"></i>
+                                <span>Image not available</span>
+                            </div>
+                        </div>
 
-                                <div style="border-radius: 12px; overflow: hidden; background: var(--bg-tertiary);">
-                                    <img src="/uploads/<%= entry.imagePath %>" alt="Intruder Capture"
-                                        id="capture-img"
-                                        style="width: 100%; height: auto; display: block;"
-                                        onerror="this.style.display='none'; document.getElementById('img-fallback').style.display='flex'">
-                                    <div id="img-fallback"
-                                        style="display:none; padding: 3rem; text-align: center; color: var(--text-muted); flex-direction: column; gap: 0.5rem;">
-                                        <i class="fas fa-camera-slash" style="font-size:2rem;"></i>
-                                        <span>Image not available</span>
+                        <div class="card-actions-row">
+                            <a href="/uploads/<%= entry.imagePath %>" download class="btn btn-primary btn-sm flex-1">
+                                <i class="fas fa-download"></i>
+                                Download Image
+                            </a>
+                            <button class="btn btn-danger btn-sm" onclick="deleteEntry('<%= entry.id %>')">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Details Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-info-circle text-secondary"></i>
+                                Capture Details
+                            </h3>
+                        </div>
+
+                        <!-- Network Information -->
+                        <div class="detail-section">
+                            <h4 class="detail-section-title">
+                                <i class="fas fa-network-wired"></i>
+                                Network Information
+                            </h4>
+                            <div class="info-list">
+                                <div class="info-row">
+                                    <span class="info-label">Public IP</span>
+                                    <code class="code-tag primary"><%= entry.extraData?.network?.public_ip || 'N/A' %></code>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Local IP</span>
+                                    <code class="code-tag secondary"><%= entry.extraData?.network?.local_ip || 'N/A' %></code>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Hostname</span>
+                                    <span class="font-medium"><%= entry.extraData?.network?.hostname || 'N/A' %></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Information -->
+                        <div class="detail-section">
+                            <h4 class="detail-section-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Location Information
+                            </h4>
+                            <% if (entry.extraData?.location?.latitude) { %>
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <span class="info-label">City</span>
+                                        <span class="font-medium"><%= entry.extraData.location.city || 'Unknown' %></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Country</span>
+                                        <span class="font-medium"><%= entry.extraData.location.country || 'Unknown' %></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Coordinates</span>
+                                        <code class="code-tag success">
+                                            <%= entry.extraData.location.latitude?.toFixed(4) %>, <%= entry.extraData.location.longitude?.toFixed(4) %>
+                                        </code>
                                     </div>
                                 </div>
 
-                                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                                    <a href="/uploads/<%= entry.imagePath %>" download class="btn btn-primary btn-sm"
-                                        style="flex: 1;">
-                                        <i class="fas fa-download"></i>
-                                        Download Image
-                                    </a>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteEntry('<%= entry.id %>')">
-                                        <i class="fas fa-trash"></i>
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
+                                <div id="detail-map" class="detail-map-container"></div>
+                            <% } else { %>
+                                <div class="no-data-box">Location data not available</div>
+                            <% } %>
+                        </div>
 
-                            <!-- Details Card -->
-                            <div class="card animate-fade-in" style="animation-delay: 0.1s;">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-info-circle"
-                                            style="margin-right: 0.5rem; color: var(--secondary);"></i>
-                                        Capture Details
-                                    </h3>
-                                </div>
-
-                                <!-- Network Information -->
-                                <div style="margin-bottom: 1.5rem;">
-                                    <h4
-                                        style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                        <i class="fas fa-network-wired" style="margin-right: 0.5rem;"></i>
-                                        Network Information
-                                    </h4>
-                                    <div style="display: grid; gap: 0.75rem;">
-                                        <div
-                                            style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                            <span style="color: var(--text-muted);">Public IP</span>
-                                            <code
-                                                style="color: var(--primary-light);"><%= entry.extraData?.network?.public_ip || 'N/A' %></code>
+                        <!-- System Information -->
+                        <% if (entry.extraData?.system?.os_name) { %>
+                            <div class="detail-section">
+                                <h4 class="detail-section-title">
+                                    <i class="fas fa-desktop"></i>
+                                    System Information
+                                </h4>
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <span class="info-label">Operating System</span>
+                                        <span class="badge badge-primary">
+                                            <i class="<%= entry.extraData.system.os_name === 'Windows' ? 'fab fa-windows' : entry.extraData.system.os_name === 'Darwin' ? 'fab fa-apple' : 'fab fa-linux' %>"></i>
+                                            <%= entry.extraData.system.os_name %> <%= entry.extraData.system.os_release || '' %>
+                                        </span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Username</span>
+                                        <code class="code-tag warning"><%= entry.extraData.system.username || 'N/A' %></code>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Machine</span>
+                                        <span class="font-medium"><%= entry.extraData.system.machine || 'N/A' %></span>
+                                    </div>
+                                    <% if (entry.extraData.system.screen_width) { %>
+                                        <div class="info-row">
+                                            <span class="info-label">Screen Resolution</span>
+                                            <code class="code-tag primary"><%= entry.extraData.system.screen_width %> &times; <%= entry.extraData.system.screen_height %></code>
                                         </div>
-                                        <div
-                                            style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                            <span style="color: var(--text-muted);">Local IP</span>
-                                            <code
-                                                style="color: var(--secondary);"><%= entry.extraData?.network?.local_ip || 'N/A' %></code>
-                                        </div>
-                                        <div
-                                            style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                            <span style="color: var(--text-muted);">Hostname</span>
-                                            <span style="font-weight: 500;">
-                                                <%= entry.extraData?.network?.hostname || 'N/A' %>
+                                    <% } %>
+                                    <% if (entry.extraData.system.battery_percent !== null && entry.extraData.system.battery_percent !== undefined) { %>
+                                        <div class="info-row">
+                                            <span class="info-label">Battery</span>
+                                            <span class="font-medium">
+                                                <%= entry.extraData.system.battery_percent %>%
+                                                <% if (entry.extraData.system.battery_plugged) { %>
+                                                    <i class="fas fa-plug text-success ml-1"></i>
+                                                <% } %>
                                             </span>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <!-- Location Information -->
-                                <div style="margin-bottom: 1.5rem;">
-                                    <h4
-                                        style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                        <i class="fas fa-map-marker-alt" style="margin-right: 0.5rem;"></i>
-                                        Location Information
-                                    </h4>
-                                    <% if (entry.extraData?.location?.latitude) { %>
-                                        <div style="display: grid; gap: 0.75rem;">
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">City</span>
-                                                <span style="font-weight: 500;">
-                                                    <%= entry.extraData.location.city || 'Unknown' %>
-                                                </span>
-                                            </div>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Country</span>
-                                                <span style="font-weight: 500;">
-                                                    <%= entry.extraData.location.country || 'Unknown' %>
-                                                </span>
-                                            </div>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Coordinates</span>
-                                                <code style="color: var(--success);">
-                                                    <%= entry.extraData.location.latitude?.toFixed(4) %>, <%= entry.extraData.location.longitude?.toFixed(4) %>
-                                                </code>
-                                            </div>
-                                        </div>
-
-                                        <!-- Mini Map -->
-                                        <div id="detail-map"
-                                            style="height: 200px; border-radius: 8px; margin-top: 1rem; overflow: hidden;">
-                                        </div>
-                                        <% } else { %>
-                                            <div
-                                                style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; text-align: center; color: var(--text-muted);">
-                                                Location data not available
-                                            </div>
-                                            <% } %>
-                                </div>
-
-                                <!-- System Information -->
-                                <% if (entry.extraData?.system?.os_name) { %>
-                                    <div>
-                                        <h4
-                                            style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                            <i class="fas fa-desktop" style="margin-right: 0.5rem;"></i>
-                                            System Information
-                                        </h4>
-                                        <div style="display: grid; gap: 0.75rem;">
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Operating System</span>
-                                                <span class="badge badge-primary">
-                                                    <i
-                                                        class="<%= entry.extraData.system.os_name === 'Windows' ? 'fab fa-windows' : entry.extraData.system.os_name === 'Darwin' ? 'fab fa-apple' : 'fab fa-linux' %>"></i>
-                                                    <%= entry.extraData.system.os_name %>
-                                                    <%= entry.extraData.system.os_release || '' %>
-                                                </span>
-                                            </div>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Username</span>
-                                                <code style="color: var(--warning);">
-                                                    <%= entry.extraData.system.username || 'N/A' %>
-                                                </code>
-                                            </div>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Machine</span>
-                                                <span style="font-weight: 500;">
-                                                    <%= entry.extraData.system.machine || 'N/A' %>
-                                                </span>
-                                            </div>
-                                            <% if (entry.extraData.system.screen_width) { %>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Screen Resolution</span>
-                                                <code style="color: var(--primary-light);">
-                                                    <%= entry.extraData.system.screen_width %> &times; <%= entry.extraData.system.screen_height %>
-                                                </code>
-                                            </div>
-                                            <% } %>
-                                            <% if (entry.extraData.system.battery_percent !== null && entry.extraData.system.battery_percent !== undefined) { %>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Battery</span>
-                                                <span style="font-weight: 500;">
-                                                    <%= entry.extraData.system.battery_percent %>%
-                                                    <% if (entry.extraData.system.battery_plugged) { %>
-                                                        <i class="fas fa-plug" style="color: var(--success); margin-left: 4px;"></i>
-                                                    <% } %>
-                                                </span>
-                                            </div>
-                                            <% } %>
-                                            <% if (entry.extraData.network?.wifi_ssid) { %>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Wi-Fi SSID</span>
-                                                <code style="color: var(--secondary);">
-                                                    <%= entry.extraData.network.wifi_ssid %>
-                                                </code>
-                                            </div>
-                                            <% } %>
-                                            <div
-                                                style="display: flex; justify-content: space-between; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                <span style="color: var(--text-muted);">Python Version</span>
-                                                <code
-                                                    style="color: var(--warning);"><%= entry.extraData.system.python_version || 'N/A' %></code>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <% } %>
+                                    <% if (entry.extraData.network?.wifi_ssid) { %>
+                                        <div class="info-row">
+                                            <span class="info-label">Wi-Fi SSID</span>
+                                            <code class="code-tag secondary"><%= entry.extraData.network.wifi_ssid %></code>
+                                        </div>
+                                    <% } %>
+                                    <div class="info-row">
+                                        <span class="info-label">Python Version</span>
+                                        <code class="code-tag warning"><%= entry.extraData.system.python_version || 'N/A' %></code>
+                                    </div>
+                                </div>
                             </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Browser History Card -->
+                <% if (entry.extraData?.browser_histories) { %>
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-history text-warning"></i>
+                                Browser History
+                            </h3>
                         </div>
 
-                        <!-- Browser History -->
-                        <% if (entry.extraData?.browser_histories) { %>
-                            <div class="card animate-fade-in" style="animation-delay: 0.2s; margin-top: 1.5rem;">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-history"
-                                            style="margin-right: 0.5rem; color: var(--warning);"></i>
-                                        Browser History
-                                    </h3>
-                                </div>
-
-                                <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
-                                    <!-- Chrome History -->
-                                    <div>
-                                        <h4
-                                            style="font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                                            <i class="fab fa-chrome" style="color: #4285F4;"></i>
-                                            Chrome
-                                        </h4>
-                                        <% if (Array.isArray(entry.extraData.browser_histories.chrome) &&
-                                            entry.extraData.browser_histories.chrome.length > 0) { %>
-                                            <div
-                                                style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
-                                                <% entry.extraData.browser_histories.chrome.forEach(function(item) { %>
-                                                    <div
-                                                        style="padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                        <div
-                                                            style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                            <%= item.title || 'No Title' %>
-                                                        </div>
-                                                        <div
-                                                            style="font-size: 0.75rem; color: var(--primary-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                            <%= item.url %>
-                                                        </div>
-                                                    </div>
-                                                    <% }); %>
+                        <div class="browser-history-grid">
+                            <!-- Chrome -->
+                            <div class="browser-column">
+                                <h4 class="browser-title">
+                                    <i class="fab fa-chrome chrome-icon"></i> Chrome
+                                </h4>
+                                <% if (Array.isArray(entry.extraData.browser_histories.chrome) && entry.extraData.browser_histories.chrome.length > 0) { %>
+                                    <div class="history-list">
+                                        <% entry.extraData.browser_histories.chrome.forEach(function(item) { %>
+                                            <div class="history-item">
+                                                <div class="history-item-title"><%= item.title || 'No Title' %></div>
+                                                <div class="history-item-url"><%= item.url %></div>
                                             </div>
-                                            <% } else { %>
-                                                <div
-                                                    style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; text-align: center; color: var(--text-muted);">
-                                                    <%= entry.extraData.browser_histories.chrome?.error
-                                                        || entry.extraData.browser_histories.chrome?.info
-                                                        || 'No history available' %>
-                                                </div>
-                                                <% } %>
+                                        <% }); %>
                                     </div>
+                                <% } else { %>
+                                    <div class="no-data-box">
+                                        <%= entry.extraData.browser_histories.chrome?.error || entry.extraData.browser_histories.chrome?.info || 'No history available' %>
+                                    </div>
+                                <% } %>
+                            </div>
 
-                                    <!-- Firefox History -->
-                                    <div>
-                                        <h4
-                                            style="font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                                            <i class="fab fa-firefox-browser" style="color: #FF7139;"></i>
-                                            Firefox
-                                        </h4>
-                                        <% if (Array.isArray(entry.extraData.browser_histories.firefox) &&
-                                            entry.extraData.browser_histories.firefox.length > 0) { %>
-                                            <div
-                                                style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
-                                                <% entry.extraData.browser_histories.firefox.forEach(function(item) { %>
-                                                    <div
-                                                        style="padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                        <div
-                                                            style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                            <%= item.title || 'No Title' %>
-                                                        </div>
-                                                        <div
-                                                            style="font-size: 0.75rem; color: var(--primary-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                            <%= item.url %>
-                                                        </div>
-                                                    </div>
-                                                    <% }); %>
+                            <!-- Firefox -->
+                            <div class="browser-column">
+                                <h4 class="browser-title">
+                                    <i class="fab fa-firefox-browser firefox-icon"></i> Firefox
+                                </h4>
+                                <% if (Array.isArray(entry.extraData.browser_histories.firefox) && entry.extraData.browser_histories.firefox.length > 0) { %>
+                                    <div class="history-list">
+                                        <% entry.extraData.browser_histories.firefox.forEach(function(item) { %>
+                                            <div class="history-item">
+                                                <div class="history-item-title"><%= item.title || 'No Title' %></div>
+                                                <div class="history-item-url"><%= item.url %></div>
                                             </div>
-                                            <% } else { %>
-                                                <div
-                                                    style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; text-align: center; color: var(--text-muted);">
-                                                    <%= entry.extraData.browser_histories.firefox?.error
-                                                        || entry.extraData.browser_histories.firefox?.info
-                                                        || 'No history available' %>
-                                                </div>
-                                                <% } %>
+                                        <% }); %>
                                     </div>
+                                <% } else { %>
+                                    <div class="no-data-box">
+                                        <%= entry.extraData.browser_histories.firefox?.error || entry.extraData.browser_histories.firefox?.info || 'No history available' %>
+                                    </div>
+                                <% } %>
+                            </div>
 
-                                    <!-- Edge History -->
-                                    <% if (entry.extraData.browser_histories.edge) { %>
-                                    <div>
-                                        <h4
-                                            style="font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                                            <i class="fab fa-edge" style="color: #0078d4;"></i>
-                                            Edge
-                                        </h4>
-                                        <% if (Array.isArray(entry.extraData.browser_histories.edge) &&
-                                            entry.extraData.browser_histories.edge.length > 0) { %>
-                                            <div
-                                                style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
-                                                <% entry.extraData.browser_histories.edge.forEach(function(item) { %>
-                                                    <div
-                                                        style="padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                                        <div
-                                                            style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                            <%= item.title || 'No Title' %>
-                                                        </div>
-                                                        <div
-                                                            style="font-size: 0.75rem; color: var(--primary-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                            <%= item.url %>
-                                                        </div>
-                                                    </div>
-                                                    <% }); %>
-                                            </div>
-                                            <% } else { %>
-                                                <div
-                                                    style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; text-align: center; color: var(--text-muted);">
-                                                    <%= entry.extraData.browser_histories.edge?.error
-                                                        || entry.extraData.browser_histories.edge?.info
-                                                        || 'No Edge history available' %>
+                            <!-- Edge -->
+                            <% if (entry.extraData.browser_histories.edge) { %>
+                                <div class="browser-column">
+                                    <h4 class="browser-title">
+                                        <i class="fab fa-edge edge-icon"></i> Edge
+                                    </h4>
+                                    <% if (Array.isArray(entry.extraData.browser_histories.edge) && entry.extraData.browser_histories.edge.length > 0) { %>
+                                        <div class="history-list">
+                                            <% entry.extraData.browser_histories.edge.forEach(function(item) { %>
+                                                <div class="history-item">
+                                                    <div class="history-item-title"><%= item.title || 'No Title' %></div>
+                                                    <div class="history-item-url"><%= item.url %></div>
                                                 </div>
-                                                <% } %>
-                                    </div>
+                                            <% }); %>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="no-data-box">
+                                            <%= entry.extraData.browser_histories.edge?.error || entry.extraData.browser_histories.edge?.info || 'No Edge history available' %>
+                                        </div>
                                     <% } %>
                                 </div>
-                            </div>
                             <% } %>
-
-                                <!-- Raw Data -->
-                                <div class="card animate-fade-in" style="animation-delay: 0.3s; margin-top: 1.5rem;">
-                                    <div class="card-header">
-                                        <h3 class="card-title">
-                                            <i class="fas fa-code"
-                                                style="margin-right: 0.5rem; color: var(--success);"></i>
-                                            Raw Data
-                                        </h3>
-                                        <button class="btn btn-secondary btn-sm" onclick="copyRawData()">
-                                            <i class="fas fa-copy"></i>
-                                            Copy JSON
-                                        </button>
-                                    </div>
-                                    <pre id="raw-data"
-                                        style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;"><%= JSON.stringify(entry, null, 2) %></pre>
-                                </div>
+                        </div>
                     </div>
-            </main>
+                <% } %>
+
+                <!-- Raw JSON Data Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-code text-success"></i>
+                            Raw Data
+                        </h3>
+                        <button class="btn btn-secondary btn-sm" onclick="copyRawData()">
+                            <i class="fas fa-copy"></i>
+                            Copy JSON
+                        </button>
+                    </div>
+                    <pre id="raw-data" class="json-viewer"><%= JSON.stringify(entry, null, 2) %></pre>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <% if (entry.extraData?.location?.latitude) { %>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <% } %>
     <%- include('partials/scripts') %>
 
-        <script>
-        // Initialize map if location exists
+    <script>
         <% if (entry.extraData?.location?.latitude) { %>
-        const lat = <%= entry.extraData.location.latitude %>;
-                const lng = <%= entry.extraData.location.longitude %>;
+            const lat = <%= entry.extraData.location.latitude %>;
+            const lng = <%= entry.extraData.location.longitude %>;
 
-                const map = L.map('detail-map').setView([lat, lng], 12);
+            const map = L.map('detail-map').setView([lat, lng], 12);
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    maxZoom: 19
-                }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
 
-                const markerIcon = L.divIcon({
-                    html: '<div style="width: 16px; height: 16px; background: #6366f1; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);"></div>',
-                    className: 'custom-marker',
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8],
-                    popupAnchor: [0, -10]
-                });
+            const markerIcon = L.divIcon({
+                html: '<div class="map-detail-marker"></div>',
+                className: 'custom-marker',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+                popupAnchor: [0, -10]
+            });
 
-                L.marker([lat, lng], { icon: markerIcon })
-                    .addTo(map)
-                    .bindPopup('<b><%= entry.extraData.location.city || "Unknown" %>, <%= entry.extraData.location.country || "" %></b>')
-                    .openPopup();
+            L.marker([lat, lng], { icon: markerIcon })
+                .addTo(map)
+                .bindPopup('<b><%= entry.extraData.location.city || "Unknown" %>, <%= entry.extraData.location.country || "" %></b>')
+                .openPopup();
         <% } %>
 
-                function copyRawData() {
-                const data = document.getElementById('raw-data').textContent;
-                navigator.clipboard.writeText(data).then(() => {
-                    // Show toast instead of alert()
-                    const toast = document.createElement('div');
-                    toast.textContent = '✓ JSON copied to clipboard';
-                    toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#10b981;color:#fff;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.875rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,0.4);transition:opacity 0.3s;';
-                    document.body.appendChild(toast);
-                    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2500);
-                }).catch(() => {
-                    // Fallback for browsers without clipboard API
-                    const ta = document.createElement('textarea');
-                    ta.value = data;
-                    ta.style.position = 'fixed';
-                    ta.style.opacity = '0';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    ta.remove();
-                });
-            }
-        </script>
+        function copyRawData() {
+            const data = document.getElementById('raw-data').textContent;
+            navigator.clipboard.writeText(data).then(() => {
+                showToast('JSON copied to clipboard', 'success');
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = data;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                showToast('JSON copied to clipboard', 'success');
+            });
+        }
+    </script>
 </body>
 
 </html>

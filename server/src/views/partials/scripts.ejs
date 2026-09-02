@@ -1,9 +1,10 @@
 <script>
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.toggle('open');
     }
 
-    // Close sidebar when clicking outside on mobile
+    // Close sidebar on mobile when clicking outside
     document.addEventListener('click', function (e) {
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.querySelector('.menu-toggle');
@@ -17,29 +18,31 @@
         }
     });
 
-    // Delete entry function
+    // Delete entry function with confirmation and toast feedback
     async function deleteEntry(id) {
         if (!confirm('Are you sure you want to delete this entry?')) return;
 
         try {
-            const response = await fetch(`/api/entries/${id}`, {
+            const response = await fetch('/api/entries/' + id, {
                 method: 'DELETE'
             });
 
             if (response.ok) {
-                location.reload();
+                showToast('Entry deleted successfully', 'success');
+                setTimeout(() => location.reload(), 600);
             } else {
-                alert('Failed to delete entry');
+                showToast('Failed to delete entry', 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to delete entry');
+            console.error('Error deleting entry:', error);
+            showToast('Failed to delete entry', 'error');
         }
     }
 
-    // Time ago helper
+    // Relative time formatting helper
     function timeAgo(date) {
         const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        if (isNaN(seconds) || seconds < 0) return 'Just now';
 
         const intervals = {
             year: 31536000,
@@ -53,15 +56,33 @@
         for (const [unit, secondsInUnit] of Object.entries(intervals)) {
             const interval = Math.floor(seconds / secondsInUnit);
             if (interval >= 1) {
-                return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
+                return interval + ' ' + unit + (interval > 1 ? 's' : '') + ' ago';
             }
         }
 
         return 'Just now';
     }
 
-    // Format timestamps on load
-    document.querySelectorAll('[data-timestamp]').forEach(el => {
-        el.textContent = timeAgo(el.dataset.timestamp);
+    // Toast notification utility
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // Format element timestamps automatically on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-timestamp]').forEach(el => {
+            if (el.dataset.timestamp) {
+                el.textContent = timeAgo(el.dataset.timestamp);
+            }
+        });
     });
 </script>

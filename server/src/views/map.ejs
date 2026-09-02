@@ -2,22 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SilentCamTrap - Location Map">
-    <title>
-        <%= title %> | SilentCamTrap
-    </title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <%- include('partials/head') %>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-
-    <%- include('partials/styles') %>
-
-    <!-- Map Page Stylesheet -->
     <link rel="stylesheet" href="/static/css/map.css">
 </head>
 
@@ -25,40 +11,32 @@
     <div class="layout">
         <%- include('partials/sidebar') %>
 
-            <main class="main-content">
-                <%- include('partials/header-bar') %>
+        <main class="main-content">
+            <%- include('partials/header-bar') %>
 
-                    <div class="page-content">
-                        <div class="card animate-fade-in"
-                            style="position: relative; height: calc(100vh - 180px); min-height: 500px; padding: 0; overflow: hidden;">
+            <div class="page-content">
+                <div class="card map-card">
+                    <!-- Leaflet map container -->
+                    <div id="fullscreen-map" class="map-container"></div>
 
-                            <!-- Leaflet map container -->
-                            <div id="fullscreen-map" style="width: 100%; height: 100%; min-height: 500px; z-index: 1;">
-                            </div>
-
-                            <!-- Empty state (shown by JS when no locations) -->
-                            <div id="map-empty-state">
-                                <i class="fas fa-map-marked-alt"></i>
-                                <p>No capture locations available yet.</p>
-                            </div>
-                        </div>
+                    <!-- Empty state -->
+                    <div id="map-empty-state" class="map-empty-overlay">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <p>No capture locations available yet.</p>
                     </div>
-            </main>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Floating map controls -->
     <div class="map-controls">
-        <!-- Theme Switcher Button & Dropdown -->
         <div class="theme-switcher-container">
             <button id="btn-theme-toggle" class="btn btn-secondary btn-icon" title="Change Map Style">
                 <i class="fas fa-layer-group"></i>
             </button>
             <div id="theme-menu" class="theme-menu">
-                <button class="theme-option-btn active" data-theme="dark">
-                    <i class="fas fa-moon"></i>
-                    <span>Dark Matter</span>
-                </button>
-                <button class="theme-option-btn" data-theme="osm">
+                <button class="theme-option-btn active" data-theme="osm">
                     <i class="fas fa-map"></i>
                     <span>OpenStreetMap</span>
                 </button>
@@ -66,17 +44,9 @@
                     <i class="fas fa-satellite"></i>
                     <span>Satellite Imagery</span>
                 </button>
-                <button class="theme-option-btn" data-theme="light">
-                    <i class="fas fa-sun"></i>
-                    <span>Positron (Light)</span>
-                </button>
                 <button class="theme-option-btn" data-theme="topo">
                     <i class="fas fa-mountain"></i>
                     <span>Topographic</span>
-                </button>
-                <button class="theme-option-btn" data-theme="voyager">
-                    <i class="fas fa-compass"></i>
-                    <span>Voyager</span>
                 </button>
             </div>
         </div>
@@ -91,237 +61,149 @@
 
     <!-- Map legend -->
     <div class="map-legend">
-        <h4><i class="fas fa-info-circle" style="margin-right: 0.4rem;"></i>Legend</h4>
+        <h4><i class="fas fa-info-circle mr-1"></i>Legend</h4>
         <div class="legend-item">
             <span class="legend-dot"></span>
             <span>Capture Location</span>
         </div>
     </div>
 
-    <!-- Raw Data Carrier: Immune to JS Formatters -->
+    <!-- Raw Data Carrier -->
     <script type="application/json" id="locations-data"><%- locations || '[]' %></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <%- include('partials/scripts') %>
 
-        <script>
-            // ── Safely parse JSON from data carrier ──────────────────────────────
-            let locations = [];
-            try {
-                const dataElement = document.getElementById('locations-data');
-                if (dataElement && dataElement.textContent.trim()) {
-                    locations = JSON.parse(dataElement.textContent);
-                }
-            } catch (err) {
-                console.error('Error parsing locations data:', err);
-                locations = [];
+    <script>
+        let locations = [];
+        try {
+            const dataElement = document.getElementById('locations-data');
+            if (dataElement && dataElement.textContent.trim()) {
+                locations = JSON.parse(dataElement.textContent);
             }
+        } catch (err) {
+            console.error('Error parsing locations data:', err);
+            locations = [];
+        }
 
-            // ── Map Tile Providers (100% Free & Open Source) ──────────────────────
-            const tileProviders = {
-                dark: {
-                    name: 'Dark Matter',
-                    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                    options: {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'
-                    }
-                },
-                osm: {
-                    name: 'OpenStreetMap',
-                    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    options: {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
-                    }
-                },
-                satellite: {
-                    name: 'Satellite Imagery',
-                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                    options: {
-                        maxZoom: 18,
-                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                    }
-                },
-                light: {
-                    name: 'Positron (Light)',
-                    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-                    options: {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'
-                    }
-                },
-                topo: {
-                    name: 'OpenTopoMap',
-                    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-                    options: {
-                        maxZoom: 17,
-                        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org" target="_blank">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org" target="_blank">OpenTopoMap</a>'
-                    }
-                },
-                voyager: {
-                    name: 'Voyager',
-                    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-                    options: {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'
-                    }
-                }
-            };
-
-            // ── Initialise Leaflet Map ───────────────────────────────────────────
-            const map = L.map('fullscreen-map', {
-                center: [20, 0],
-                zoom: 2,
-                zoomControl: true,
-                attributionControl: true
-            });
-
-            // Ensure Leaflet re-calculates dimensions immediately and on window resize
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 100);
-            window.addEventListener('resize', () => {
-                map.invalidateSize();
-            });
-
-            // ── Handle Map Theme Switching ───────────────────────────────────────
-            let currentTileLayer = null;
-            const savedTheme = localStorage.getItem('silentcamtrap_map_theme') || 'dark';
-
-            function setMapTheme(themeKey) {
-                const provider = tileProviders[themeKey] || tileProviders.dark;
-
-                if (currentTileLayer) {
-                    map.removeLayer(currentTileLayer);
-                }
-
-                currentTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
-                localStorage.setItem('silentcamtrap_map_theme', themeKey);
-
-                // Update active state in menu
-                document.querySelectorAll('.theme-option-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.theme === themeKey);
-                });
+        const tileProviders = {
+            osm: {
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }
+            },
+            satellite: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                options: { maxZoom: 18, attribution: 'Tiles &copy; Esri' }
+            },
+            topo: {
+                url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+                options: { maxZoom: 17, attribution: 'Map data: &copy; OpenStreetMap contributors' }
             }
+        };
 
-            // Apply initial theme
-            setMapTheme(savedTheme);
+        const map = L.map('fullscreen-map', {
+            center: [20, 0],
+            zoom: 2,
+            zoomControl: true,
+            attributionControl: true
+        });
 
-            // ── Custom glowing marker icon ────────────────────────────────────────
-            const markerIcon = L.divIcon({
-                html: `<div style="
-                width: 18px;
-                height: 18px;
-                background: linear-gradient(135deg, #6366f1, #818cf8);
-                border: 3px solid rgba(255,255,255,0.9);
-                border-radius: 50%;
-                box-shadow: 0 0 0 4px rgba(99,102,241,0.25), 0 0 20px rgba(99,102,241,0.5);
-            "></div>`,
-                className: 'custom-marker',
-                iconSize: [18, 18],
-                iconAnchor: [9, 9],
-                popupAnchor: [0, -12]
-            });
+        setTimeout(() => map.invalidateSize(), 100);
+        window.addEventListener('resize', () => map.invalidateSize());
 
-            // ── Add markers ──────────────────────────────────────────────────────
-            const markers = [];
+        let currentTileLayer = null;
+        const savedTheme = localStorage.getItem('silentcamtrap_map_theme') || 'osm';
 
-            if (Array.isArray(locations)) {
-                locations.forEach(loc => {
-                    if (!loc.lat || !loc.lng) return;
+        function setMapTheme(themeKey) {
+            const provider = tileProviders[themeKey] || tileProviders.osm;
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            currentTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
+            localStorage.setItem('silentcamtrap_map_theme', themeKey);
 
-                    const imgHtml = loc.image
-                        ? `<div class="popup-img-wrap">
-                           <img src="/uploads/${loc.image}"
-                                alt="Capture"
-                                onerror="this.closest('.popup-img-wrap').style.display='none'">
-                       </div>`
-                        : `<div class="popup-img-wrap">
-                           <span class="no-img"><i class="fas fa-camera-slash"></i> No image</span>
-                       </div>`;
-
-                    const timestamp = loc.timestamp
-                        ? new Date(loc.timestamp).toLocaleString()
-                        : 'Unknown time';
-
-                    const popupContent = `
-                    <div class="custom-popup">
-                        ${imgHtml}
-                        <h4>${loc.city || 'Unknown Location'}</h4>
-                        <p class="popup-meta">
-                            <i class="fas fa-globe-americas" style="margin-right:4px;"></i>
-                            ${loc.country || 'Unknown Country'}
-                        </p>
-                        <p class="popup-meta">
-                            <i class="fas fa-map-pin" style="margin-right:4px;"></i>
-                            ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}
-                        </p>
-                        <p class="popup-meta">
-                            <i class="fas fa-clock" style="margin-right:4px;"></i>
-                            ${timestamp}
-                        </p>
-                        <a href="/entry/${loc.id}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-eye"></i> View Details
-                        </a>
-                    </div>`;
-
-                    const marker = L.marker([loc.lat, loc.lng], { icon: markerIcon })
-                        .addTo(map)
-                        .bindPopup(popupContent, { maxWidth: 280 });
-
-                    markers.push(marker);
-                });
-            }
-
-            // ── Empty state ──────────────────────────────────────────────────────
-            if (markers.length === 0) {
-                const el = document.getElementById('map-empty-state');
-                if (el) el.style.display = 'flex';
-            }
-
-            // ── Fit bounds to all markers ────────────────────────────────────────
-            function fitAllMarkers() {
-                if (markers.length === 0) return;
-                const group = new L.featureGroup(markers);
-                map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 10 });
-            }
-
-            if (markers.length > 0) {
-                fitAllMarkers();
-            }
-
-            // ── Wire up interactive controls ─────────────────────────────────────
-            const themeToggleBtn = document.getElementById('btn-theme-toggle');
-            const themeMenu = document.getElementById('theme-menu');
-
-            themeToggleBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                themeMenu.classList.toggle('active');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function (e) {
-                if (!themeMenu.contains(e.target) && e.target !== themeToggleBtn) {
-                    themeMenu.classList.remove('active');
-                }
-            });
-
-            // Theme selection clicks
             document.querySelectorAll('.theme-option-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const themeKey = this.dataset.theme;
-                    setMapTheme(themeKey);
-                    themeMenu.classList.remove('active');
-                });
+                btn.classList.toggle('active', btn.dataset.theme === themeKey);
             });
+        }
 
-            document.getElementById('btn-reset-view').addEventListener('click', function () {
-                map.setView([20, 0], 2);
+        setMapTheme(savedTheme);
+
+        const markerIcon = L.divIcon({
+            html: '<div class="map-full-marker"></div>',
+            className: 'custom-marker',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+            popupAnchor: [0, -12]
+        });
+
+        const markers = [];
+
+        if (Array.isArray(locations)) {
+            locations.forEach(loc => {
+                if (!loc.lat || !loc.lng) return;
+
+                const imgHtml = loc.image
+                    ? `<div class="popup-img-wrap"><img src="/uploads/${loc.image}" alt="Capture" onerror="this.closest('.popup-img-wrap').style.display='none'"></div>`
+                    : `<div class="popup-img-wrap"><span class="no-img"><i class="fas fa-camera-slash"></i> No image</span></div>`;
+
+                const timestamp = loc.timestamp ? new Date(loc.timestamp).toLocaleString() : 'Unknown time';
+
+                const popupContent = `
+                <div class="custom-popup">
+                    ${imgHtml}
+                    <h4>${loc.city || 'Unknown Location'}</h4>
+                    <p class="popup-meta"><i class="fas fa-globe-americas mr-1"></i>${loc.country || 'Unknown Country'}</p>
+                    <p class="popup-meta"><i class="fas fa-map-pin mr-1"></i>${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}</p>
+                    <p class="popup-meta"><i class="fas fa-clock mr-1"></i>${timestamp}</p>
+                    <a href="/entry/${loc.id}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>`;
+
+                const marker = L.marker([loc.lat, loc.lng], { icon: markerIcon })
+                    .addTo(map)
+                    .bindPopup(popupContent, { maxWidth: 280 });
+
+                markers.push(marker);
             });
+        }
 
-            document.getElementById('btn-fit-markers').addEventListener('click', fitAllMarkers);
-        </script>
+        if (markers.length === 0) {
+            const el = document.getElementById('map-empty-state');
+            if (el) el.style.display = 'flex';
+        }
+
+        function fitAllMarkers() {
+            if (markers.length === 0) return;
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 10 });
+        }
+
+        if (markers.length > 0) fitAllMarkers();
+
+        const themeToggleBtn = document.getElementById('btn-theme-toggle');
+        const themeMenu = document.getElementById('theme-menu');
+
+        themeToggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            themeMenu.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!themeMenu.contains(e.target) && e.target !== themeToggleBtn) {
+                themeMenu.classList.remove('active');
+            }
+        });
+
+        document.querySelectorAll('.theme-option-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                setMapTheme(this.dataset.theme);
+                themeMenu.classList.remove('active');
+            });
+        });
+
+        document.getElementById('btn-reset-view').addEventListener('click', () => map.setView([20, 0], 2));
+        document.getElementById('btn-fit-markers').addEventListener('click', fitAllMarkers);
+    </script>
 </body>
 
 </html>

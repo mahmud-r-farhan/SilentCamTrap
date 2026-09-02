@@ -124,8 +124,8 @@ if (config.enableRateLimit) {
 }
 
 // Static files
-app.use('/uploads', express.static(config.uploadDir));
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(config.uploadDir, { maxAge: '1h', etag: true }));
+app.use('/static', express.static(path.join(__dirname, 'public'), { maxAge: '1d', etag: true }));
 
 // View engine
 app.set('view engine', 'ejs');

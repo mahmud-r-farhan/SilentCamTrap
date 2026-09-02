@@ -2,58 +2,42 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SilentCamTrap - Error">
-    <title>
-        <%= title %> | SilentCamTrap
-    </title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <%- include('partials/styles') %>
+    <%- include('partials/head') %>
 </head>
 
 <body>
     <div class="layout">
         <%- include('partials/sidebar') %>
 
-            <main class="main-content">
-                <%- include('partials/header-bar') %>
+        <main class="main-content">
+            <%- include('partials/header-bar') %>
 
-                    <div class="page-content">
-                        <div class="card" style="max-width: 600px; margin: 3rem auto; text-align: center;">
-                            <div style="font-size: 6rem; margin-bottom: 1.5rem;">
-                                <% if (title==='Not Found' ) { %>
-                                    <i class="fas fa-search" style="color: var(--warning);"></i>
-                                    <% } else { %>
-                                        <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
-                                        <% } %>
-                            </div>
-
-                            <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">
-                                <%= title %>
-                            </h2>
-                            <p style="color: var(--text-muted); margin-bottom: 2rem;">
-                                <%= message %>
-                            </p>
-
-                            <div style="display: flex; justify-content: center; gap: 1rem;">
-                                <a href="/" class="btn btn-primary">
-                                    <i class="fas fa-home"></i>
-                                    Go to Dashboard
-                                </a>
-                                <button onclick="history.back()" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i>
-                                    Go Back
-                                </button>
-                            </div>
-                        </div>
+            <div class="page-content">
+                <div class="card error-card">
+                    <div class="error-icon">
+                        <% if (title === 'Not Found') { %>
+                            <i class="fas fa-search text-warning"></i>
+                        <% } else { %>
+                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                        <% } %>
                     </div>
-            </main>
+
+                    <h2 class="error-title"><%= title %></h2>
+                    <p class="error-message"><%= message %></p>
+
+                    <div class="error-actions">
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-home"></i>
+                            Go to Dashboard
+                        </a>
+                        <button onclick="history.back()" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <%- include('partials/scripts') %>
