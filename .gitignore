@@ -1,11 +1,17 @@
-# SilentCamTrap
+# ============================================================
+# SilentCamTrap - .gitignore
+# ============================================================
 
+# ------------------------------------------------------------
 # Python
+# ------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Python build / packaging
 build/
 develop-eggs/
 dist/
@@ -21,65 +27,364 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
+# Python caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+.tox/
+.nox/
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+coverage/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ------------------------------------------------------------
 # Virtual environments
+# ------------------------------------------------------------
 venv/
 ENV/
 env/
 .venv/
+env.bak/
+venv.bak/
 
-# PyInstaller
-*.manifest
-*.spec
+# ------------------------------------------------------------
+# Environment / Secrets
+# ------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.template
 
-# Node.js
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Secret/config files
+secrets.json
+credentials.json
+service-account.json
+config.local.*
+settings.local.*
+
+# ------------------------------------------------------------
+# Node.js / JavaScript
+# ------------------------------------------------------------
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Environment files
-.env
-.env.local
-.env.*.local
+# Package manager caches
+.npm/
+.yarn/
+.pnpm-store/
 
-# Data directories
+# ------------------------------------------------------------
+# Frontend Build Artifacts
+# ------------------------------------------------------------
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.vercel/
+.netlify/
+.cache/
+.parcel-cache/
+.vite/
+.turbo/
+
+# TypeScript
+*.tsbuildinfo
+
+# ------------------------------------------------------------
+# Databases
+# ------------------------------------------------------------
+*.db
+*.db3
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+
+# Project runtime databases
+temp_*.db
+temp_*.sqlite
+*.db-journal
+
+# ------------------------------------------------------------
+# SilentCamTrap Runtime Data
+# ------------------------------------------------------------
+
+# Intruder / detection logs
 intruder_logs/
 server/data/
-uploads/
 
-# Temp files
-temp_*.db
+# Uploaded media
+uploads/
+upload/
+uploaded/
+media/
+captures/
+camera_captures/
+snapshots/
+photos/
+videos/
+
+# Runtime/session data
+runtime/
+runtime_data/
+sessions/
+session_data/
+tmp/
+temp/
+
+# Generated reports
+reports/
+generated_reports/
+
+# ------------------------------------------------------------
+# Logs
+# ------------------------------------------------------------
+logs/
+*.log
+*.log.*
+log/
+debug.log
+error.log
+access.log
+
+# ------------------------------------------------------------
+# Temporary files
+# ------------------------------------------------------------
 *.tmp
 *.temp
-
-# IDE
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
-
-# OS
-.DS_Store
-Thumbs.db
-ehthumbs.db
-
-# Logs
-logs/
-*.log
-
-# Test
-coverage/
-.pytest_cache/
-.nyc_output/
-
-# Build artifacts
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Misc
 *.bak
 *.backup
+*.old
+*.orig
+*.rej
+
+# Lock / runtime files
+*.pid
+*.pid.lock
+*.seed
+*.cache
+
+# ------------------------------------------------------------
+# PID / Socket / IPC
+# ------------------------------------------------------------
+*.sock
+*.socket
+*.pid
+
+# ------------------------------------------------------------
+# PyInstaller
+# ------------------------------------------------------------
+*.manifest
+*.spec
+
+# PyInstaller generated folders
+pyinstaller/
+release/
+
+# ------------------------------------------------------------
+# Docker
+# ------------------------------------------------------------
+.dockerignore.local
+docker-data/
+docker-volumes/
+docker/secrets/
+
+# ------------------------------------------------------------
+# IDE / Editors
+# ------------------------------------------------------------
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# VS Code local history
+.history/
+
+# ------------------------------------------------------------
+# OS
+# ------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Windows thumbnail cache
+ThumbCache/
+ehthumbs_vista.db
+
+# ------------------------------------------------------------
+# Testing
+# ------------------------------------------------------------
+coverage/
+.nyc_output/
+.pytest_cache/
+test-results/
+playwright-report/
+blob-report/
+
+# ------------------------------------------------------------
+# Security / Detection Artifacts
+# ------------------------------------------------------------
+
+# Generated fingerprints / hashes
+fingerprints/
+hashes/
+signatures/
+
+# Detection/debug dumps
+dumps/
+crash_dumps/
+debug_dumps/
+
+# Generated screenshots
+screenshots/
+debug_screenshots/
+
+# ------------------------------------------------------------
+# Server / Framework
+# ------------------------------------------------------------
+
+# Flask
+instance/
+
+# Django
+*.pot
+local_settings.py
+db.sqlite3
+
+# FastAPI / Uvicorn
+.uvicorn/
+
+# Celery
+celerybeat-schedule
+
+# ------------------------------------------------------------
+# Monitoring / Runtime
+# ------------------------------------------------------------
+.monitoring/
+.telemetry/
+metrics/
+traces/
+
+# ------------------------------------------------------------
+# Generated API / Documentation
+# ------------------------------------------------------------
+.openapi/
+swagger-generated/
+api-docs/generated/
+
+# ------------------------------------------------------------
+# Local Development
+# ------------------------------------------------------------
+.local/
+.local-data/
+dev-data/
+development-data/
+server/local/
+
+# ------------------------------------------------------------
+# Backup / Export Files
+# ------------------------------------------------------------
+*.dump
+*.sql
+*.sql.gz
+*.tar
+*.tar.gz
+*.zip
+
+# ------------------------------------------------------------
+# Generated Certificates / Local TLS
+# ------------------------------------------------------------
+certs/
+certificates/
+ssl/
+tls/
+
+# ------------------------------------------------------------
+# Cloud / Deployment
+# ------------------------------------------------------------
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Serverless
+.serverless/
+
+# AWS
+.aws/
+
+# ------------------------------------------------------------
+# Local AI / ML / Model Files
+# ------------------------------------------------------------
+models/
+model_cache/
+*.onnx
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# ------------------------------------------------------------
+# Miscellaneous
+# ------------------------------------------------------------
+*.orig
+*.rej
+*.patch
+*.diff
+
+# Generated archives
+archives/
+exports/
+
+# Local configuration
+*.local
+*.local.json
+*.local.yaml
+*.local.yml
+*.local.toml
