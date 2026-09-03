@@ -1,7 +1,7 @@
 # SilentCamTrap Python Client Dependencies
 # Install with: pip install -r requirements.txt
 
-opencv-python>=4.8.0
+opencv-python>=5.0.0.93
 requests>=2.31.0
 geocoder>=1.38.1
 psutil>=5.9.0          # battery, CPU, RAM, disk, uptime, process count
