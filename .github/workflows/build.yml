@@ -68,7 +68,7 @@ jobs:
           echo "ARTIFACT_NAME=$dir.zip" >> $env:GITHUB_ENV
 
       - name: Upload artifact to workflow run
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SilentCamTrap-windows-${{ github.ref_name }}
           path: python/SilentCamTrap-${{ github.ref_name }}-windows.zip
