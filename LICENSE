@@ -20,10 +20,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
----
 
-DISCLAIMER: This software is provided for educational and authorized security 
-testing purposes only. The authors disclaim any liability for misuse. Users 
-must comply with all applicable laws regarding data collection, privacy, and 
-surveillance. Unauthorized use of this software to monitor, track, or collect 
-data from individuals without their explicit consent is strictly prohibited.
+DISCLAIMER
+
+This software is provided for educational and authorized security testing
+purposes only. The authors and copyright holders are not responsible for any
+misuse, damage, loss, or illegal activity resulting from the use, modification,
+distribution, or deployment of this software.
+
+Users are solely responsible for ensuring that their use of this software
+complies with all applicable local, national, and international laws,
+regulations, and third-party rights, including laws relating to privacy, data
+protection, computer access, surveillance, and cybersecurity.
+
+Unauthorized access to, monitoring of, tracking of, or collection of data from
+any computer, device, system, network, or individual without explicit
+permission or lawful authorization is strictly prohibited.
+
+By using, modifying, or distributing this software, you acknowledge that you
+understand and accept these terms and assume full responsibility for your use
+of the software.
