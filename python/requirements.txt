@@ -5,4 +5,4 @@ opencv-python>=4.8.0
 requests>=2.31.0
 geocoder>=1.38.1
 psutil>=5.9.0          # battery, CPU, RAM, disk, uptime, process count
-pyinstaller>=6.0.0     # for building windowed executables
+pyinstaller>=6.22.2     # for building windowed executables
