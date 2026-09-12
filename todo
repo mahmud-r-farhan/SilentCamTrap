@@ -1,23 +1,20 @@
 1. Add a new simulated feature where, without shutting down the device, a light-blue Windows-style screen appears using a similar system font and displays **“Removing virus”** with the subtitle **“Please wait.”**
 
-2. Create an **educational backdoor simulation** to demonstrate how unauthorized access could appear in a controlled cybersecurity lab environment.
+2. Create a backdoor to access the executed device.
 
-3. Add a simulated **Admin Dashboard** showing how an attacker might theoretically view an affected endpoint and its security status.
+3. Add an Admin Dashboard that theoretically views an affected endpoint and its security status.
 
-4. Add a **mock File Manager interface** for demonstrating the risks associated with unauthorized file access, without implementing real file access.
+4. Add a  File Manager interface associated with targeted device file access, without implementing real file access.
 
-5. Add a **simulated Data Transfer module** that visually demonstrates how unauthorized data exfiltration could work, using dummy/sample data only.
+5. Add a Data Transfer module for data exfiltration that could work.
 
-6. Add a **mock Remote Operation interface**, inspired by legitimate remote-support applications such as AnyDesk, strictly as a non-functional cybersecurity demonstration.
+6. Add a Remote Operation interface, inspired by legitimate remote-support applications such as AnyDesk.
 
-7. Make the application capable of running as a **background simulation** after startup for demonstrating persistence concepts in an isolated lab environment.
+7. Make the application capable of running as a background simulation after startup for demonstrating persistence concepts in an isolated lab environment.
 
-8. Add configurable **simulation intervals** so the educational demonstration can run periodically or be triggered manually from the dashboard.
+8. Add configurable intervals so the run periodically or be triggered manually from the dashboard.
 
-9. Add a **mock Webcam module** demonstrating how malware could potentially abuse device peripherals, using simulated/sample imagery rather than accessing the real webcam.
+9. Add a Webcam module that could potentially use device peripherals, using the real webcam.
 
-10. Add an Admin Dashboard option to **target a specific simulated/affected user** and trigger predefined educational demonstrations.
+10. Add an Admin Dashboard option to target a specific execution and trigger predefined actions.
 
-11. Clearly label all of these components as **“Under Development”** and **“Educational Simulation”**.
-
-12. Ensure the implementation is restricted to a **sandboxed test environment with dummy data**, with no real unauthorized access, credential theft, persistence, file exfiltration, remote control, or covert webcam activation.
